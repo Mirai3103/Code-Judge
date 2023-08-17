@@ -59,12 +59,13 @@ public class ExecuteCppStrategy : IExecuteCodeStrategy
         var result = new ExecuteCodeResult();
         process.Start();
         await process.StandardInput.WriteLineAsync(input);
+        var memoryUsageTask = WatchMemory(process, maxMemoryUsageInBytes);
         var output = process.StandardOutput.ReadToEndAsync();
         var error = process.StandardError.ReadToEndAsync();
         var exitTask = process.WaitForExitAsync();
         var cancellationTokenSource = new CancellationTokenSource();
         cancellationTokenSource.CancelAfter(TimeSpan.FromMilliseconds(timeLimit));
-        await Task.WhenAny(exitTask, output, error, Task.Delay(-1, cancellationTokenSource.Token));
+        await Task.WhenAny(exitTask, output, error,memoryUsageTask, Task.Delay(-1, cancellationTokenSource.Token));
         if (cancellationTokenSource.Token.IsCancellationRequested)
         {
             process.Kill();
