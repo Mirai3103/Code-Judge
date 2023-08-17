@@ -45,7 +45,7 @@ public static class ConfigureServices
             services.AddTransient( executeCodeStrategyType);
             
         }
-        services.AddSingleton<IExecuteCodeFactory, ExecuteCodeFactory>();
+        services.AddSingleton<IExecuteCodeStrategyFactory, ExecuteCodeStrategyFactory>();
         services
             .AddDefaultIdentity<ApplicationUser>()
             .AddRoles<IdentityRole>()

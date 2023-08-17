@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Code_Judge.Infrastructure.ExecuteCode;
 
-public class ExecuteCppStrategy : IExecuteCodeStrategy
+public class ExecuteCppStrategy : BaseExecuteCodeStrategy
 {
     private readonly IConfiguration _configuration;
     private const string FileExtension = ".cpp";
@@ -21,7 +21,7 @@ public class ExecuteCppStrategy : IExecuteCodeStrategy
         _executeCodePath = _configuration["ExecuteCodePath"] ?? throw new InvalidOperationException();
     }
 
-    public async Task<ExecuteCodeResult> ExecuteCodeAsync(string code, string input, string expectedOutput,
+    public override async Task<ExecuteCodeResult> ExecuteCodeAsync(string code, string input, string expectedOutput,
         int timeLimit, float memoryLimit)
     {
         var executionFilename = Guid.NewGuid().ToString();
@@ -54,6 +54,7 @@ public class ExecuteCppStrategy : IExecuteCodeStrategy
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
+                
             },
         };
         var result = new ExecuteCodeResult();
@@ -63,6 +64,7 @@ public class ExecuteCppStrategy : IExecuteCodeStrategy
         var output = process.StandardOutput.ReadToEndAsync();
         var error = process.StandardError.ReadToEndAsync();
         var exitTask = process.WaitForExitAsync();
+        
         var cancellationTokenSource = new CancellationTokenSource();
         cancellationTokenSource.CancelAfter(TimeSpan.FromMilliseconds(timeLimit));
         await Task.WhenAny(exitTask, output, error,memoryUsageTask, Task.Delay(-1, cancellationTokenSource.Token));
@@ -106,28 +108,6 @@ public class ExecuteCppStrategy : IExecuteCodeStrategy
         result.TimeElapsed = (int)executionTimeInMs;
         return result;
     }
-
-    private async Task<float> WatchMemory(Process process, long maxMemoryUsageInBytes)
-    {
-        var memoryUsageInBytes = 0L;
-        while (!process.HasExited)
-        {
-            if (memoryUsageInBytes < process.WorkingSet64)
-            {
-                memoryUsageInBytes = process.WorkingSet64;
-            }
-            if (memoryUsageInBytes > maxMemoryUsageInBytes)
-            {
-                process.Kill();
-                break;
-            }
-            Console.WriteLine(memoryUsageInBytes);
-            await Task.Delay(1);
-        }
-
-        return memoryUsageInBytes * 1.0f / (1024 * 1024);
-    }
-
     private async Task<bool> CompileCodeAsync(string code, string executionFilename)
     {
         var filePath = Path.Combine(_executeCodePath, executionFilename + FileExtension);
@@ -147,8 +127,7 @@ public class ExecuteCppStrategy : IExecuteCodeStrategy
             }
         };
         process.Start();
-        var output = await process.StandardOutput.ReadToEndAsync();
-        var error = await process.StandardError.ReadToEndAsync();
+     
         await process.WaitForExitAsync();
         if (process.ExitCode != 0)
         {

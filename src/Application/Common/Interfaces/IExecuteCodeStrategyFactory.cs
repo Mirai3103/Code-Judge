@@ -2,7 +2,7 @@
 
 namespace Code_Judge.Application.Common.Interfaces;
 
-public interface IExecuteCodeFactory
+public interface IExecuteCodeStrategyFactory
 {
     IExecuteCodeStrategy GetExecuteCodeStrategy(ProgramingLanguage programingLanguage);
 }

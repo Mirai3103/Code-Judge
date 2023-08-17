@@ -68,8 +68,6 @@ public class ExecuteCPPTest
     {
         var code = @"
                     #include <iostream>
-                    #include <windows.h>
-                    #include <psapi.h>
                     const int N = 100000000;
 
                     int a[N];
@@ -78,13 +76,6 @@ public class ExecuteCPPTest
                     for (int i = 0; i < N; ++i) {
                         a[i] = i;
                      }
-                     PROCESS_MEMORY_COUNTERS memCounter;
-BOOL result = GetProcessMemoryInfo(GetCurrentProcess(),
-                                   &memCounter,
-                                   sizeof( memCounter ));
-                        std::cout << memCounter.WorkingSetSize << ""\n"";
-                        std::cout << memCounter.PeakWorkingSetSize;
-                     return 0;
                     }";
         var input = @"1 2";
         var expectedOutput = @"Hello World!";
@@ -92,5 +83,24 @@ BOOL result = GetProcessMemoryInfo(GetCurrentProcess(),
         var memoryLimitInMB = 2f;
         var result = await _executeCppStrategy.ExecuteCodeAsync(code, input, expectedOutput, timeLimit, memoryLimitInMB);
         Assert.AreEqual(SubmissionStatus.MemoryLimitExceeded, result.Status);
+    }
+    [Test]
+    public async Task ShouldVailableToReadInput()
+    {
+        var code = @"
+                     #include <iostream>
+                    int main() {
+                        int a, b;
+                        std::cin >> a >> b;
+                        std::cout << a + b;
+                        return 0;
+                    }";
+        var input = @"1 2";
+        var expectedOutput = @"3";
+        var timeLimit = 1000;
+        var memoryLimit = 20;
+        var result = await _executeCppStrategy.ExecuteCodeAsync(code, input, expectedOutput, timeLimit, memoryLimit);
+        Assert.AreEqual(SubmissionStatus.Accepted, result.Status);
+        
     }
 }

@@ -4,10 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Code_Judge.Infrastructure.ExecuteCode;
 
-public class ExecuteCodeFactory: IExecuteCodeFactory
+public class ExecuteCodeStrategyFactory: IExecuteCodeStrategyFactory
 {
     private readonly IServiceProvider _serviceProvider;
-    public ExecuteCodeFactory(IServiceProvider serviceProvider)
+    public ExecuteCodeStrategyFactory(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
     }
