@@ -33,9 +33,7 @@ public class CreateProblemCommandTest : BaseTestFixture
             MemoryLimit = 10,
             TimeLimit = 1000,
             DifficultyLevel = DifficultyLevel.Easy,
-            TemplateCode =
-                "function twoSum(nums: number[], target: number): number[] {\n    const object: any = {};\n\n    for (let i = 0; i < nums.length; i++) {\n        let need = target - nums[i];\n        if (object[need] !== undefined) {\n            return [object[need], i];\n        } else {\n            object[nums[i]] = i;\n        }\n    }\n    return [0, 0];\n};",
-            Description =
+                  Description =
                 "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
             IsPublic = true,
             Name = "Two Sum",
@@ -58,6 +56,5 @@ public class CreateProblemCommandTest : BaseTestFixture
         item.MemoryLimit.Should().Be(command.MemoryLimit);
         item.Points.Should().Be(command.Points);
         item.TimeLimit.Should().Be(command.TimeLimit);
-        item.TemplateCode.Should().Be(command.TemplateCode);
     }
 }

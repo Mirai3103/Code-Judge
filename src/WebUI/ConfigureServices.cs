@@ -23,7 +23,9 @@ public static class ConfigureServices
 
         services.AddControllersWithViews();
 
-        services.AddRazorPages();
+        services.AddRazorPages(
+           );
+        
 
         services.AddScoped<FluentValidationSchemaProcessor>(provider =>
         {
@@ -45,15 +47,36 @@ public static class ConfigureServices
             configure.SchemaProcessors.Add(fluentValidationSchemaProcessor);
 
             configure.Title = "Code_Judge API";
-            configure.AddSecurity("JWT", Enumerable.Empty<string>(), new OpenApiSecurityScheme
+            configure.AddSecurity("OAuth2", Enumerable.Empty<string>(), new OpenApiSecurityScheme
             {
-                Type = OpenApiSecuritySchemeType.ApiKey,
+                Type = OpenApiSecuritySchemeType.OAuth2,
+                Flow = NSwag.OpenApiOAuth2Flow.Implicit,
+                AuthorizationUrl = "https://localhost:5251/connect/authorize",
+                TokenUrl = "https://localhost:5251/connect/token",
+                
                 Name = "Authorization",
-                In = OpenApiSecurityApiKeyLocation.Header,
-                Description = "Type into the textbox: Bearer {your JWT token}."
-            });
+                Scopes = new Dictionary<string, string>
+                {
+                    {  "api.read", "Read Access to API" },
+                    {  "api.write", "Write Access to API" }
+                },
+                Flows = new OpenApiOAuthFlows()
+                {
+                    Implicit = new OpenApiOAuthFlow()
+                    {
+                        Scopes = new Dictionary<string, string>
+                        {
+                            {  "api.read", "Read Access to API" },
+                            {  "api.write", "Write Access to API" }
+                        },
+                        TokenUrl = "https://localhost:5251/connect/token",
+                        AuthorizationUrl = "https://localhost:5251/connect/authorize",
 
-            configure.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
+                    },
+                }
+                
+            });
+            configure.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("OAuth2"));
         });
 
         return services;

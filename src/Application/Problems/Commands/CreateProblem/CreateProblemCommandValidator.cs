@@ -17,7 +17,6 @@ public class CreateProblemCommandValidator : AbstractValidator<CreateProblemComm
             .NotNull();
         RuleFor(v => v.TimeLimit).GreaterThan(0).NotNull();
         RuleFor(v => v.Points).GreaterThan(0).NotNull();
-        RuleFor(v => v.TemplateCode).NotEmpty();
         RuleFor(v => v.Hint).MaximumLength(200);
         RuleFor(v => v.DifficultyLevel).NotNull();
     }

@@ -12,7 +12,6 @@ public class Problem:BaseAuditableEntity
     public string Slug { get; set; } = null!;
     public int Points { get; set; }
     public DifficultyLevel DifficultyLevel { get; set; }
-    public string TemplateCode { get; set; } = null!;
     public string? Hint { get; set; }
     public virtual IEnumerable<TestCase> TestCases { get; set; } = new HashSet<TestCase>();
     public virtual IEnumerable<Submission> Submissions { get; set; } = new HashSet<Submission>();

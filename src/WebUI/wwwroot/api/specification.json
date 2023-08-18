@@ -6,6 +6,185 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/api/Problems": {
+      "get": {
+        "tags": [
+          "Problems"
+        ],
+        "operationId": "Problems_GetProblemsWithPagination",
+        "parameters": [
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 2
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedListOfProblemBriefDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Problems"
+        ],
+        "operationId": "Problems_Create",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProblemCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/api/Problems/{id}/TestCases": {
+      "get": {
+        "tags": [
+          "Problems"
+        ],
+        "operationId": "Problems_GetTestCases",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TestCase"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Problems/{id}/PublishTestCases": {
+      "get": {
+        "tags": [
+          "Problems"
+        ],
+        "operationId": "Problems_GetPublishTestCases",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TestCase"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/TestCases": {
+      "post": {
+        "tags": [
+          "TestCases"
+        ],
+        "operationId": "TestCases_Create",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTestCaseCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/TodoItems": {
       "get": {
         "tags": [
@@ -55,7 +234,7 @@
         },
         "security": [
           {
-            "JWT": []
+            "OAuth2": []
           }
         ]
       },
@@ -91,7 +270,7 @@
         },
         "security": [
           {
-            "JWT": []
+            "OAuth2": []
           }
         ]
       }
@@ -153,7 +332,7 @@
         },
         "security": [
           {
-            "JWT": []
+            "OAuth2": []
           }
         ]
       },
@@ -191,7 +370,7 @@
         },
         "security": [
           {
-            "JWT": []
+            "OAuth2": []
           }
         ]
       }
@@ -252,7 +431,7 @@
         },
         "security": [
           {
-            "JWT": []
+            "OAuth2": []
           }
         ]
       }
@@ -277,7 +456,7 @@
         },
         "security": [
           {
-            "JWT": []
+            "OAuth2": []
           }
         ]
       },
@@ -313,7 +492,7 @@
         },
         "security": [
           {
-            "JWT": []
+            "OAuth2": []
           }
         ]
       }
@@ -351,7 +530,7 @@
         },
         "security": [
           {
-            "JWT": []
+            "OAuth2": []
           }
         ]
       },
@@ -411,7 +590,7 @@
         },
         "security": [
           {
-            "JWT": []
+            "OAuth2": []
           }
         ]
       },
@@ -449,7 +628,7 @@
         },
         "security": [
           {
-            "JWT": []
+            "OAuth2": []
           }
         ]
       }
@@ -480,6 +659,487 @@
   },
   "components": {
     "schemas": {
+      "PaginatedListOfProblemBriefDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProblemBriefDto"
+            }
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasPreviousPage": {
+            "type": "boolean"
+          },
+          "hasNextPage": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ProblemBriefDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contestId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "isPublic": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "points": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "difficultyLevel": {
+            "$ref": "#/components/schemas/DifficultyLevel"
+          }
+        }
+      },
+      "DifficultyLevel": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "Easy",
+          "Medium",
+          "Hard"
+        ],
+        "enum": [
+          0,
+          1,
+          2
+        ]
+      },
+      "CreateProblemCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "description",
+          "points",
+          "difficultyLevel",
+          "timeLimit",
+          "memoryLimit"
+        ],
+        "properties": {
+          "contestId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "isPublic": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "nullable": false
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "nullable": false
+          },
+          "points": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0.0,
+            "nullable": false,
+            "exclusiveMinimum": true
+          },
+          "difficultyLevel": {
+            "nullable": false,
+            "$ref": "#/components/schemas/DifficultyLevel"
+          },
+          "hint": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 0,
+            "nullable": true
+          },
+          "timeLimit": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0.0,
+            "nullable": false,
+            "exclusiveMinimum": true
+          },
+          "memoryLimit": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0.0,
+            "nullable": false,
+            "exclusiveMinimum": true
+          }
+        }
+      },
+      "TestCase": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "input": {
+                "type": "string"
+              },
+              "output": {
+                "type": "string"
+              },
+              "problemId": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "problem": {
+                "$ref": "#/components/schemas/Problem"
+              },
+              "isHidden": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      },
+      "Problem": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAuditableEntity"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "contestId": {
+                "type": "integer",
+                "format": "int32",
+                "nullable": true
+              },
+              "contest": {
+                "nullable": true,
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Contest"
+                  }
+                ]
+              },
+              "isPublic": {
+                "type": "boolean"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "slug": {
+                "type": "string"
+              },
+              "points": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "difficultyLevel": {
+                "$ref": "#/components/schemas/DifficultyLevel"
+              },
+              "hint": {
+                "type": "string",
+                "nullable": true
+              },
+              "testCases": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/TestCase"
+                }
+              },
+              "submissions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Submission"
+                }
+              },
+              "editorial": {
+                "nullable": true,
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Editorial"
+                  }
+                ]
+              },
+              "editorialId": {
+                "type": "integer",
+                "format": "int32",
+                "nullable": true
+              },
+              "timeLimit": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "memoryLimit": {
+                "type": "number",
+                "format": "float"
+              }
+            }
+          }
+        ]
+      },
+      "Contest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAuditableEntity"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "startTime": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "endTime": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "problems": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "description": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          }
+        ]
+      },
+      "BaseAuditableEntity": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "type": "object",
+            "x-abstract": true,
+            "additionalProperties": false,
+            "properties": {
+              "created": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "createdBy": {
+                "type": "string",
+                "nullable": true
+              },
+              "lastModified": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              },
+              "lastModifiedBy": {
+                "type": "string",
+                "nullable": true
+              },
+              "deleted": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        ]
+      },
+      "BaseEntity": {
+        "type": "object",
+        "x-abstract": true,
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "domainEvents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BaseEvent"
+            }
+          }
+        }
+      },
+      "BaseEvent": {
+        "type": "object",
+        "x-abstract": true,
+        "additionalProperties": false
+      },
+      "Submission": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAuditableEntity"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "language": {
+                "$ref": "#/components/schemas/ProgramingLanguage"
+              },
+              "error": {
+                "type": "string",
+                "nullable": true
+              },
+              "problemId": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "problem": {
+                "$ref": "#/components/schemas/Problem"
+              },
+              "runTime": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "memory": {
+                "type": "number",
+                "format": "float"
+              },
+              "note": {
+                "type": "string",
+                "nullable": true
+              },
+              "status": {
+                "$ref": "#/components/schemas/SubmissionStatus"
+              }
+            }
+          }
+        ]
+      },
+      "ProgramingLanguage": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "C",
+          "Cpp",
+          "Java",
+          "Python",
+          "CSharp",
+          "JavaScript"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "SubmissionStatus": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "Accepted",
+          "WrongAnswer",
+          "MemoryLimitExceeded",
+          "OutputLimitExceeded",
+          "TimeLimitExceeded",
+          "RuntimeError",
+          "InternalError",
+          "CompileError"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      },
+      "Editorial": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAuditableEntity"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "problemId": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "problem": {
+                "$ref": "#/components/schemas/Problem"
+              },
+              "content": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "CreateTestCaseCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "input",
+          "output",
+          "problemId"
+        ],
+        "properties": {
+          "input": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "nullable": false
+          },
+          "output": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "nullable": false
+          },
+          "problemId": {
+            "type": "integer",
+            "format": "int32",
+            "minLength": 1,
+            "nullable": false
+          },
+          "isHidden": {
+            "type": "boolean"
+          }
+        }
+      },
       "PaginatedListOfTodoItemBriefDto": {
         "type": "object",
         "additionalProperties": false,
@@ -781,17 +1441,25 @@
       }
     },
     "securitySchemes": {
-      "JWT": {
-        "type": "apiKey",
-        "description": "Type into the textbox: Bearer {your JWT token}.",
+      "OAuth2": {
+        "type": "oauth2",
         "name": "Authorization",
-        "in": "header"
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://localhost:5251/connect/authorize",
+            "tokenUrl": "https://localhost:5251/connect/token",
+            "scopes": {
+              "api.read": "Read Access to API",
+              "api.write": "Write Access to API"
+            }
+          }
+        }
       }
     }
   },
   "security": [
     {
-      "JWT": []
+      "OAuth2": []
     }
   ]
 }

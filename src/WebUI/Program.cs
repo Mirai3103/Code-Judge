@@ -1,13 +1,16 @@
+using Code_Judge.Domain.Entities;
 using Code_Judge.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-
 // Add services to the container.
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddWebUIServices();
 
 var app = builder.Build();
+var a =OnStartedUp(app.Services);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -37,6 +40,12 @@ app.UseSwaggerUi3(settings =>
 {
     settings.Path = "/api";
     settings.DocumentPath = "/api/specification.json";
+    settings.OAuth2Client = new NSwag.AspNetCore.OAuth2ClientSettings
+    {
+        ClientId = "swagger",
+        ClientSecret = "a",
+        UsePkceWithAuthorizationCodeGrant = true
+    };
 });
 
 app.UseRouting();
@@ -52,5 +61,24 @@ app.MapControllerRoute(
 app.MapRazorPages();
 
 app.MapFallbackToFile("index.html");
-
+ 
 app.Run();
+
+ static async Task OnStartedUp(IServiceProvider services)
+{
+    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+    var existingUser = await userManager.FindByNameAsync("administrator@local");
+    if (existingUser is not null)
+    {
+        return;
+    }
+
+    var user = new ApplicationUser
+    {
+        UserName = "administrator@local", Email = "administrator@local", EmailConfirmed = true
+    };
+    var result = await userManager.CreateAsync(user, "Kaito@1412");
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    await roleManager.CreateAsync(new IdentityRole("Administrator"));
+    await userManager.AddToRoleAsync(user, "Administrator");
+}

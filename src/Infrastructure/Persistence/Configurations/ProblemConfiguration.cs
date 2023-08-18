@@ -36,10 +36,7 @@ public class ProblemConfiguration: IEntityTypeConfiguration<Problem>
         builder.Property(t=>t.DifficultyLevel)
             .IsRequired()
             .HasDefaultValue(DifficultyLevel.Easy);
-        builder.Property(t => t.TemplateCode)
-            .IsRequired()
-            .HasColumnType("text")
-            .IsUnicode(false);
+
         builder.HasMany<TestCase>(t => t.TestCases)
             .WithOne(t=>t.Problem)
             .HasForeignKey(t => t.ProblemId)

@@ -14,7 +14,6 @@ public record CreateProblemCommand : IRequest<int>
     public string Description { get; set; } = null!;
     public int Points { get; set; }
     public DifficultyLevel DifficultyLevel { get; set; }
-    public string TemplateCode { get; set; } = null!;
     public string? Hint { get; set; }
     public int TimeLimit { get; set; } // in milliseconds
     public float MemoryLimit { get; set; } // in MB
@@ -40,7 +39,6 @@ public class CreateProblemCommandHandler : IRequestHandler<CreateProblemCommand,
             Description = request.Description,
             Points = request.Points,
             DifficultyLevel = request.DifficultyLevel,
-            TemplateCode = request.TemplateCode,
             TimeLimit = request.TimeLimit,
             MemoryLimit = request.MemoryLimit,
             ContestId = request.ContestId

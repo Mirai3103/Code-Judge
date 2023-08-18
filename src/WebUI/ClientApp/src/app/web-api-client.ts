@@ -11,6 +11,323 @@
 import axios, { AxiosError } from 'axios';
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, CancelToken } from 'axios';
 
+export interface IProblemsClient {
+    getProblemsWithPagination(pageNumber: number | undefined, pageSize: number | undefined): Promise<PaginatedListOfProblemBriefDto>;
+    create(command: CreateProblemCommand): Promise<number>;
+    getTestCases(id: number): Promise<TestCase[]>;
+    getPublishTestCases(id: number): Promise<TestCase[]>;
+}
+
+export class ProblemsClient implements IProblemsClient {
+    private instance: AxiosInstance;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, instance?: AxiosInstance) {
+
+        this.instance = instance ? instance : axios.create();
+
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+
+    }
+
+    getProblemsWithPagination(pageNumber: number | undefined, pageSize: number | undefined, cancelToken?: CancelToken | undefined): Promise<PaginatedListOfProblemBriefDto> {
+        let url_ = this.baseUrl + "/api/Problems?";
+        if (pageNumber === null)
+            throw new Error("The parameter 'pageNumber' cannot be null.");
+        else if (pageNumber !== undefined)
+            url_ += "PageNumber=" + encodeURIComponent("" + pageNumber) + "&";
+        if (pageSize === null)
+            throw new Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processGetProblemsWithPagination(_response);
+        });
+    }
+
+    protected processGetProblemsWithPagination(response: AxiosResponse): Promise<PaginatedListOfProblemBriefDto> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = PaginatedListOfProblemBriefDto.fromJS(resultData200);
+            return Promise.resolve<PaginatedListOfProblemBriefDto>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<PaginatedListOfProblemBriefDto>(null as any);
+    }
+
+    create(command: CreateProblemCommand, cancelToken?: CancelToken | undefined): Promise<number> {
+        let url_ = this.baseUrl + "/api/Problems";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processCreate(_response);
+        });
+    }
+
+    protected processCreate(response: AxiosResponse): Promise<number> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return Promise.resolve<number>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    getTestCases(id: number, cancelToken?: CancelToken | undefined): Promise<TestCase[]> {
+        let url_ = this.baseUrl + "/api/Problems/{id}/TestCases";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processGetTestCases(_response);
+        });
+    }
+
+    protected processGetTestCases(response: AxiosResponse): Promise<TestCase[]> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(TestCase.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return Promise.resolve<TestCase[]>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<TestCase[]>(null as any);
+    }
+
+    getPublishTestCases(id: number, cancelToken?: CancelToken | undefined): Promise<TestCase[]> {
+        let url_ = this.baseUrl + "/api/Problems/{id}/PublishTestCases";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processGetPublishTestCases(_response);
+        });
+    }
+
+    protected processGetPublishTestCases(response: AxiosResponse): Promise<TestCase[]> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(TestCase.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return Promise.resolve<TestCase[]>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<TestCase[]>(null as any);
+    }
+}
+
+export interface ITestCasesClient {
+    create(command: CreateTestCaseCommand): Promise<number>;
+}
+
+export class TestCasesClient implements ITestCasesClient {
+    private instance: AxiosInstance;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, instance?: AxiosInstance) {
+
+        this.instance = instance ? instance : axios.create();
+
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+
+    }
+
+    create(command: CreateTestCaseCommand, cancelToken?: CancelToken | undefined): Promise<number> {
+        let url_ = this.baseUrl + "/api/TestCases";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processCreate(_response);
+        });
+    }
+
+    protected processCreate(response: AxiosResponse): Promise<number> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return Promise.resolve<number>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<number>(null as any);
+    }
+}
+
 export interface ITodoItemsClient {
     getTodoItemsWithPagination(listId: number | undefined, pageNumber: number | undefined, pageSize: number | undefined): Promise<PaginatedListOfTodoItemBriefDto>;
     create(command: CreateTodoItemCommand): Promise<number>;
@@ -680,6 +997,706 @@ export class WeatherForecastClient implements IWeatherForecastClient {
         }
         return Promise.resolve<WeatherForecast[]>(null as any);
     }
+}
+
+export class PaginatedListOfProblemBriefDto implements IPaginatedListOfProblemBriefDto {
+    items?: ProblemBriefDto[];
+    pageNumber?: number;
+    totalPages?: number;
+    totalCount?: number;
+    hasPreviousPage?: boolean;
+    hasNextPage?: boolean;
+
+    constructor(data?: IPaginatedListOfProblemBriefDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["items"])) {
+                this.items = [] as any;
+                for (let item of _data["items"])
+                    this.items!.push(ProblemBriefDto.fromJS(item));
+            }
+            this.pageNumber = _data["pageNumber"];
+            this.totalPages = _data["totalPages"];
+            this.totalCount = _data["totalCount"];
+            this.hasPreviousPage = _data["hasPreviousPage"];
+            this.hasNextPage = _data["hasNextPage"];
+        }
+    }
+
+    static fromJS(data: any): PaginatedListOfProblemBriefDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PaginatedListOfProblemBriefDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        data["pageNumber"] = this.pageNumber;
+        data["totalPages"] = this.totalPages;
+        data["totalCount"] = this.totalCount;
+        data["hasPreviousPage"] = this.hasPreviousPage;
+        data["hasNextPage"] = this.hasNextPage;
+        return data;
+    }
+}
+
+export interface IPaginatedListOfProblemBriefDto {
+    items?: ProblemBriefDto[];
+    pageNumber?: number;
+    totalPages?: number;
+    totalCount?: number;
+    hasPreviousPage?: boolean;
+    hasNextPage?: boolean;
+}
+
+export class ProblemBriefDto implements IProblemBriefDto {
+    contestId?: number | undefined;
+    isPublic?: boolean;
+    name?: string;
+    slug?: string;
+    points?: number;
+    difficultyLevel?: DifficultyLevel;
+
+    constructor(data?: IProblemBriefDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.contestId = _data["contestId"];
+            this.isPublic = _data["isPublic"];
+            this.name = _data["name"];
+            this.slug = _data["slug"];
+            this.points = _data["points"];
+            this.difficultyLevel = _data["difficultyLevel"];
+        }
+    }
+
+    static fromJS(data: any): ProblemBriefDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ProblemBriefDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["contestId"] = this.contestId;
+        data["isPublic"] = this.isPublic;
+        data["name"] = this.name;
+        data["slug"] = this.slug;
+        data["points"] = this.points;
+        data["difficultyLevel"] = this.difficultyLevel;
+        return data;
+    }
+}
+
+export interface IProblemBriefDto {
+    contestId?: number | undefined;
+    isPublic?: boolean;
+    name?: string;
+    slug?: string;
+    points?: number;
+    difficultyLevel?: DifficultyLevel;
+}
+
+export enum DifficultyLevel {
+    Easy = 0,
+    Medium = 1,
+    Hard = 2,
+}
+
+export class CreateProblemCommand implements ICreateProblemCommand {
+    contestId?: number | undefined;
+    isPublic?: boolean;
+    name!: string;
+    description!: string;
+    points!: number;
+    difficultyLevel!: DifficultyLevel;
+    hint?: string | undefined;
+    timeLimit!: number;
+    memoryLimit!: number;
+
+    constructor(data?: ICreateProblemCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.contestId = _data["contestId"];
+            this.isPublic = _data["isPublic"];
+            this.name = _data["name"];
+            this.description = _data["description"];
+            this.points = _data["points"];
+            this.difficultyLevel = _data["difficultyLevel"];
+            this.hint = _data["hint"];
+            this.timeLimit = _data["timeLimit"];
+            this.memoryLimit = _data["memoryLimit"];
+        }
+    }
+
+    static fromJS(data: any): CreateProblemCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateProblemCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["contestId"] = this.contestId;
+        data["isPublic"] = this.isPublic;
+        data["name"] = this.name;
+        data["description"] = this.description;
+        data["points"] = this.points;
+        data["difficultyLevel"] = this.difficultyLevel;
+        data["hint"] = this.hint;
+        data["timeLimit"] = this.timeLimit;
+        data["memoryLimit"] = this.memoryLimit;
+        return data;
+    }
+}
+
+export interface ICreateProblemCommand {
+    contestId?: number | undefined;
+    isPublic?: boolean;
+    name: string;
+    description: string;
+    points: number;
+    difficultyLevel: DifficultyLevel;
+    hint?: string | undefined;
+    timeLimit: number;
+    memoryLimit: number;
+}
+
+export abstract class BaseEntity implements IBaseEntity {
+    id?: number;
+    domainEvents?: BaseEvent[];
+
+    constructor(data?: IBaseEntity) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            if (Array.isArray(_data["domainEvents"])) {
+                this.domainEvents = [] as any;
+                for (let item of _data["domainEvents"])
+                    this.domainEvents!.push(BaseEvent.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): BaseEntity {
+        data = typeof data === 'object' ? data : {};
+        throw new Error("The abstract class 'BaseEntity' cannot be instantiated.");
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        if (Array.isArray(this.domainEvents)) {
+            data["domainEvents"] = [];
+            for (let item of this.domainEvents)
+                data["domainEvents"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface IBaseEntity {
+    id?: number;
+    domainEvents?: BaseEvent[];
+}
+
+export class TestCase extends BaseEntity implements ITestCase {
+    input?: string;
+    output?: string;
+    problemId?: number;
+    problem?: Problem;
+    isHidden?: boolean;
+
+    constructor(data?: ITestCase) {
+        super(data);
+    }
+
+    override init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.input = _data["input"];
+            this.output = _data["output"];
+            this.problemId = _data["problemId"];
+            this.problem = _data["problem"] ? Problem.fromJS(_data["problem"]) : <any>undefined;
+            this.isHidden = _data["isHidden"];
+        }
+    }
+
+    static override fromJS(data: any): TestCase {
+        data = typeof data === 'object' ? data : {};
+        let result = new TestCase();
+        result.init(data);
+        return result;
+    }
+
+    override toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["input"] = this.input;
+        data["output"] = this.output;
+        data["problemId"] = this.problemId;
+        data["problem"] = this.problem ? this.problem.toJSON() : <any>undefined;
+        data["isHidden"] = this.isHidden;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface ITestCase extends IBaseEntity {
+    input?: string;
+    output?: string;
+    problemId?: number;
+    problem?: Problem;
+    isHidden?: boolean;
+}
+
+export abstract class BaseAuditableEntity extends BaseEntity implements IBaseAuditableEntity {
+    created?: Date;
+    createdBy?: string | undefined;
+    lastModified?: Date | undefined;
+    lastModifiedBy?: string | undefined;
+    deleted?: Date;
+
+    constructor(data?: IBaseAuditableEntity) {
+        super(data);
+    }
+
+    override init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.created = _data["created"] ? new Date(_data["created"].toString()) : <any>undefined;
+            this.createdBy = _data["createdBy"];
+            this.lastModified = _data["lastModified"] ? new Date(_data["lastModified"].toString()) : <any>undefined;
+            this.lastModifiedBy = _data["lastModifiedBy"];
+            this.deleted = _data["deleted"] ? new Date(_data["deleted"].toString()) : <any>undefined;
+        }
+    }
+
+    static override fromJS(data: any): BaseAuditableEntity {
+        data = typeof data === 'object' ? data : {};
+        throw new Error("The abstract class 'BaseAuditableEntity' cannot be instantiated.");
+    }
+
+    override toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["created"] = this.created ? this.created.toISOString() : <any>undefined;
+        data["createdBy"] = this.createdBy;
+        data["lastModified"] = this.lastModified ? this.lastModified.toISOString() : <any>undefined;
+        data["lastModifiedBy"] = this.lastModifiedBy;
+        data["deleted"] = this.deleted ? this.deleted.toISOString() : <any>undefined;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IBaseAuditableEntity extends IBaseEntity {
+    created?: Date;
+    createdBy?: string | undefined;
+    lastModified?: Date | undefined;
+    lastModifiedBy?: string | undefined;
+    deleted?: Date;
+}
+
+export class Problem extends BaseAuditableEntity implements IProblem {
+    contestId?: number | undefined;
+    contest?: Contest | undefined;
+    isPublic?: boolean;
+    name?: string;
+    description?: string;
+    slug?: string;
+    points?: number;
+    difficultyLevel?: DifficultyLevel;
+    hint?: string | undefined;
+    testCases?: TestCase[];
+    submissions?: Submission[];
+    editorial?: Editorial | undefined;
+    editorialId?: number | undefined;
+    timeLimit?: number;
+    memoryLimit?: number;
+
+    constructor(data?: IProblem) {
+        super(data);
+    }
+
+    override init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.contestId = _data["contestId"];
+            this.contest = _data["contest"] ? Contest.fromJS(_data["contest"]) : <any>undefined;
+            this.isPublic = _data["isPublic"];
+            this.name = _data["name"];
+            this.description = _data["description"];
+            this.slug = _data["slug"];
+            this.points = _data["points"];
+            this.difficultyLevel = _data["difficultyLevel"];
+            this.hint = _data["hint"];
+            if (Array.isArray(_data["testCases"])) {
+                this.testCases = [] as any;
+                for (let item of _data["testCases"])
+                    this.testCases!.push(TestCase.fromJS(item));
+            }
+            if (Array.isArray(_data["submissions"])) {
+                this.submissions = [] as any;
+                for (let item of _data["submissions"])
+                    this.submissions!.push(Submission.fromJS(item));
+            }
+            this.editorial = _data["editorial"] ? Editorial.fromJS(_data["editorial"]) : <any>undefined;
+            this.editorialId = _data["editorialId"];
+            this.timeLimit = _data["timeLimit"];
+            this.memoryLimit = _data["memoryLimit"];
+        }
+    }
+
+    static override fromJS(data: any): Problem {
+        data = typeof data === 'object' ? data : {};
+        let result = new Problem();
+        result.init(data);
+        return result;
+    }
+
+    override toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["contestId"] = this.contestId;
+        data["contest"] = this.contest ? this.contest.toJSON() : <any>undefined;
+        data["isPublic"] = this.isPublic;
+        data["name"] = this.name;
+        data["description"] = this.description;
+        data["slug"] = this.slug;
+        data["points"] = this.points;
+        data["difficultyLevel"] = this.difficultyLevel;
+        data["hint"] = this.hint;
+        if (Array.isArray(this.testCases)) {
+            data["testCases"] = [];
+            for (let item of this.testCases)
+                data["testCases"].push(item.toJSON());
+        }
+        if (Array.isArray(this.submissions)) {
+            data["submissions"] = [];
+            for (let item of this.submissions)
+                data["submissions"].push(item.toJSON());
+        }
+        data["editorial"] = this.editorial ? this.editorial.toJSON() : <any>undefined;
+        data["editorialId"] = this.editorialId;
+        data["timeLimit"] = this.timeLimit;
+        data["memoryLimit"] = this.memoryLimit;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IProblem extends IBaseAuditableEntity {
+    contestId?: number | undefined;
+    contest?: Contest | undefined;
+    isPublic?: boolean;
+    name?: string;
+    description?: string;
+    slug?: string;
+    points?: number;
+    difficultyLevel?: DifficultyLevel;
+    hint?: string | undefined;
+    testCases?: TestCase[];
+    submissions?: Submission[];
+    editorial?: Editorial | undefined;
+    editorialId?: number | undefined;
+    timeLimit?: number;
+    memoryLimit?: number;
+}
+
+export class Contest extends BaseAuditableEntity implements IContest {
+    name?: string;
+    startTime?: Date;
+    endTime?: Date;
+    problems?: Problem[];
+    description?: string | undefined;
+
+    constructor(data?: IContest) {
+        super(data);
+    }
+
+    override init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.name = _data["name"];
+            this.startTime = _data["startTime"] ? new Date(_data["startTime"].toString()) : <any>undefined;
+            this.endTime = _data["endTime"] ? new Date(_data["endTime"].toString()) : <any>undefined;
+            if (Array.isArray(_data["problems"])) {
+                this.problems = [] as any;
+                for (let item of _data["problems"])
+                    this.problems!.push(Problem.fromJS(item));
+            }
+            this.description = _data["description"];
+        }
+    }
+
+    static override fromJS(data: any): Contest {
+        data = typeof data === 'object' ? data : {};
+        let result = new Contest();
+        result.init(data);
+        return result;
+    }
+
+    override toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        data["startTime"] = this.startTime ? this.startTime.toISOString() : <any>undefined;
+        data["endTime"] = this.endTime ? this.endTime.toISOString() : <any>undefined;
+        if (Array.isArray(this.problems)) {
+            data["problems"] = [];
+            for (let item of this.problems)
+                data["problems"].push(item.toJSON());
+        }
+        data["description"] = this.description;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IContest extends IBaseAuditableEntity {
+    name?: string;
+    startTime?: Date;
+    endTime?: Date;
+    problems?: Problem[];
+    description?: string | undefined;
+}
+
+export abstract class BaseEvent implements IBaseEvent {
+
+    constructor(data?: IBaseEvent) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+    }
+
+    static fromJS(data: any): BaseEvent {
+        data = typeof data === 'object' ? data : {};
+        throw new Error("The abstract class 'BaseEvent' cannot be instantiated.");
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        return data;
+    }
+}
+
+export interface IBaseEvent {
+}
+
+export class Submission extends BaseAuditableEntity implements ISubmission {
+    code?: string;
+    language?: ProgramingLanguage;
+    error?: string | undefined;
+    problemId?: number;
+    problem?: Problem;
+    runTime?: number;
+    memory?: number;
+    note?: string | undefined;
+    status?: SubmissionStatus;
+
+    constructor(data?: ISubmission) {
+        super(data);
+    }
+
+    override init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.code = _data["code"];
+            this.language = _data["language"];
+            this.error = _data["error"];
+            this.problemId = _data["problemId"];
+            this.problem = _data["problem"] ? Problem.fromJS(_data["problem"]) : <any>undefined;
+            this.runTime = _data["runTime"];
+            this.memory = _data["memory"];
+            this.note = _data["note"];
+            this.status = _data["status"];
+        }
+    }
+
+    static override fromJS(data: any): Submission {
+        data = typeof data === 'object' ? data : {};
+        let result = new Submission();
+        result.init(data);
+        return result;
+    }
+
+    override toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["code"] = this.code;
+        data["language"] = this.language;
+        data["error"] = this.error;
+        data["problemId"] = this.problemId;
+        data["problem"] = this.problem ? this.problem.toJSON() : <any>undefined;
+        data["runTime"] = this.runTime;
+        data["memory"] = this.memory;
+        data["note"] = this.note;
+        data["status"] = this.status;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface ISubmission extends IBaseAuditableEntity {
+    code?: string;
+    language?: ProgramingLanguage;
+    error?: string | undefined;
+    problemId?: number;
+    problem?: Problem;
+    runTime?: number;
+    memory?: number;
+    note?: string | undefined;
+    status?: SubmissionStatus;
+}
+
+export enum ProgramingLanguage {
+    C = 0,
+    Cpp = 1,
+    Java = 2,
+    Python = 3,
+    CSharp = 4,
+    JavaScript = 5,
+}
+
+export enum SubmissionStatus {
+    Accepted = 0,
+    WrongAnswer = 1,
+    MemoryLimitExceeded = 2,
+    OutputLimitExceeded = 3,
+    TimeLimitExceeded = 4,
+    RuntimeError = 5,
+    InternalError = 6,
+    CompileError = 7,
+}
+
+export class Editorial extends BaseAuditableEntity implements IEditorial {
+    problemId?: number;
+    problem?: Problem;
+    content?: string;
+
+    constructor(data?: IEditorial) {
+        super(data);
+    }
+
+    override init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.problemId = _data["problemId"];
+            this.problem = _data["problem"] ? Problem.fromJS(_data["problem"]) : <any>undefined;
+            this.content = _data["content"];
+        }
+    }
+
+    static override fromJS(data: any): Editorial {
+        data = typeof data === 'object' ? data : {};
+        let result = new Editorial();
+        result.init(data);
+        return result;
+    }
+
+    override toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["problemId"] = this.problemId;
+        data["problem"] = this.problem ? this.problem.toJSON() : <any>undefined;
+        data["content"] = this.content;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IEditorial extends IBaseAuditableEntity {
+    problemId?: number;
+    problem?: Problem;
+    content?: string;
+}
+
+export class CreateTestCaseCommand implements ICreateTestCaseCommand {
+    input!: string;
+    output!: string;
+    problemId!: number;
+    isHidden?: boolean;
+
+    constructor(data?: ICreateTestCaseCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.input = _data["input"];
+            this.output = _data["output"];
+            this.problemId = _data["problemId"];
+            this.isHidden = _data["isHidden"];
+        }
+    }
+
+    static fromJS(data: any): CreateTestCaseCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateTestCaseCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["input"] = this.input;
+        data["output"] = this.output;
+        data["problemId"] = this.problemId;
+        data["isHidden"] = this.isHidden;
+        return data;
+    }
+}
+
+export interface ICreateTestCaseCommand {
+    input: string;
+    output: string;
+    problemId: number;
+    isHidden?: boolean;
 }
 
 export class PaginatedListOfTodoItemBriefDto implements IPaginatedListOfTodoItemBriefDto {
