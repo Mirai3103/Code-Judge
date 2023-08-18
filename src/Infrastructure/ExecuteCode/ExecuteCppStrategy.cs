@@ -41,7 +41,7 @@ public class ExecuteCppStrategy : BaseExecuteCodeStrategy
 
         // todo: execute 
         var fileExecutePath = Path.Combine(_executeCodePath, executionFilename + _executeFileExtension);
-        var maxMemoryUsageInBytes = (long)(memoryLimit * 1024 * 1024);
+       
         var process = new Process()
         {
             StartInfo =
@@ -57,56 +57,7 @@ public class ExecuteCppStrategy : BaseExecuteCodeStrategy
                 
             },
         };
-        var result = new ExecuteCodeResult();
-        process.Start();
-        await process.StandardInput.WriteLineAsync(input);
-        var memoryUsageTask = WatchMemory(process, maxMemoryUsageInBytes);
-        var output = process.StandardOutput.ReadToEndAsync();
-        var error = process.StandardError.ReadToEndAsync();
-        var exitTask = process.WaitForExitAsync();
-        
-        var cancellationTokenSource = new CancellationTokenSource();
-        cancellationTokenSource.CancelAfter(TimeSpan.FromMilliseconds(timeLimit));
-        await Task.WhenAny(exitTask, output, error,memoryUsageTask, Task.Delay(-1, cancellationTokenSource.Token));
-        if (cancellationTokenSource.Token.IsCancellationRequested)
-        {
-            process.Kill();
-            result.Status = SubmissionStatus.TimeLimitExceeded;
-            result.IsSuccess = false;
-            result.ExitCode = 1;
-            result.Error = "Time Limit Exceeded";
-            return result;
-        }
-
-        await exitTask;
-        result.ExitCode = process.ExitCode;
-        result.IsSuccess = false;
-        result.Status = SubmissionStatus.Accepted;
-        var executionTimeInMs = (process.ExitTime - process.StartTime).TotalMilliseconds;
-        // if (await memoryUsageTask > memoryLimit)
-        // {
-        //     result.Status = SubmissionStatus.MemoryLimitExceeded;
-        // }
-        // else
-        if (result.ExitCode != 0)
-        {
-            result.Status = SubmissionStatus.RuntimeError;
-            result.Error = await error;
-        }
-        else if (await output != expectedOutput)
-        {
-            result.Status = SubmissionStatus.WrongAnswer;
-        }
-        else
-        {
-            result.IsSuccess = true;
-        }
-
-        result.MemoryUsage = 0;
-
-
-        result.TimeElapsed = (int)executionTimeInMs;
-        return result;
+        return await WatchProcess(process,input,expectedOutput,timeLimit,memoryLimit);
     }
     private async Task<bool> CompileCodeAsync(string code, string executionFilename)
     {

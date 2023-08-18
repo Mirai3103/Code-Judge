@@ -53,7 +53,8 @@ public class ExecuteCPPTest
         var code = @"
                     #include <iostream>
                     int main() {
-                        while(true);
+                        while(true){}
+                        std::cout << ""Hello World!"";
                         return 0;
                     }";
         var input = @"1 2";
@@ -101,6 +102,57 @@ public class ExecuteCPPTest
         var memoryLimit = 20;
         var result = await _executeCppStrategy.ExecuteCodeAsync(code, input, expectedOutput, timeLimit, memoryLimit);
         Assert.AreEqual(SubmissionStatus.Accepted, result.Status);
-        
+    }
+    [Test]
+    public async Task ShouldReadListOfString()
+    {
+        var code = @"
+                     #include <iostream>
+                     #include <vector>
+                     #include <string>
+                    int main() {
+                        int n;
+                        std::cin >> n;
+                        std::vector<std::string> a(n);
+                        std::cin.ignore();
+                        for (int i = 0; i < n; ++i) {
+                            std::getline(std::cin, a[i]);
+                        }
+                        for (int i = 0; i < n; ++i) {
+                            std::cout << a[i] << "" "";
+                        }
+                        return 0;
+                    }";
+        var input = "2\r\nhello world\r\ni am here";
+        var expectedOutput = @"hello world i am here ";
+        var timeLimit = 1000;
+        var memoryLimit = 20;
+        var result = await _executeCppStrategy.ExecuteCodeAsync(code, input, expectedOutput, timeLimit, memoryLimit);
+        Assert.AreEqual(SubmissionStatus.Accepted, result.Status);
+    }
+    [Test]
+    public async Task ShouldReadListOfInt()
+    {
+        var code = @"
+                     #include <iostream>
+                     #include <vector>
+                    int main() {
+                        int n;
+                        std::cin >> n;
+                        std::vector<int> a(n);
+                        for (int i = 0; i < n; ++i) {
+                            std::cin >> a[i];
+                        }
+                        for (int i = 0; i < n; ++i) {
+                            std::cout << a[i] << "" "";
+                        }
+                        return 0;
+                    }";
+        var input = "2\r\n1 2";
+        var expectedOutput = @"1 2 ";
+        var timeLimit = 1000;
+        var memoryLimit = 20;
+        var result = await _executeCppStrategy.ExecuteCodeAsync(code, input, expectedOutput, timeLimit, memoryLimit);
+        Assert.AreEqual(SubmissionStatus.Accepted, result.Status);
     }
 }
