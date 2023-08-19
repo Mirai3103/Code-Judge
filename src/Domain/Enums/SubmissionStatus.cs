@@ -10,5 +10,6 @@ public enum SubmissionStatus
     RuntimeError = 5,
     InternalError = 6,
     CompileError = 7,
+    Rejected = 8,
  
 }

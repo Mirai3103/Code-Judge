@@ -1069,6 +1069,9 @@ export class ProblemBriefDto implements IProblemBriefDto {
     name?: string;
     slug?: string;
     points?: number;
+    id?: number;
+    created?: Date;
+    createdBy?: string;
     difficultyLevel?: DifficultyLevel;
 
     constructor(data?: IProblemBriefDto) {
@@ -1087,6 +1090,9 @@ export class ProblemBriefDto implements IProblemBriefDto {
             this.name = _data["name"];
             this.slug = _data["slug"];
             this.points = _data["points"];
+            this.id = _data["id"];
+            this.created = _data["created"] ? new Date(_data["created"].toString()) : <any>undefined;
+            this.createdBy = _data["createdBy"];
             this.difficultyLevel = _data["difficultyLevel"];
         }
     }
@@ -1105,6 +1111,9 @@ export class ProblemBriefDto implements IProblemBriefDto {
         data["name"] = this.name;
         data["slug"] = this.slug;
         data["points"] = this.points;
+        data["id"] = this.id;
+        data["created"] = this.created ? this.created.toISOString() : <any>undefined;
+        data["createdBy"] = this.createdBy;
         data["difficultyLevel"] = this.difficultyLevel;
         return data;
     }
@@ -1116,6 +1125,9 @@ export interface IProblemBriefDto {
     name?: string;
     slug?: string;
     points?: number;
+    id?: number;
+    created?: Date;
+    createdBy?: string;
     difficultyLevel?: DifficultyLevel;
 }
 
@@ -1195,7 +1207,6 @@ export interface ICreateProblemCommand {
 
 export abstract class BaseEntity implements IBaseEntity {
     id?: number;
-    domainEvents?: BaseEvent[];
 
     constructor(data?: IBaseEntity) {
         if (data) {
@@ -1209,11 +1220,6 @@ export abstract class BaseEntity implements IBaseEntity {
     init(_data?: any) {
         if (_data) {
             this.id = _data["id"];
-            if (Array.isArray(_data["domainEvents"])) {
-                this.domainEvents = [] as any;
-                for (let item of _data["domainEvents"])
-                    this.domainEvents!.push(BaseEvent.fromJS(item));
-            }
         }
     }
 
@@ -1225,18 +1231,12 @@ export abstract class BaseEntity implements IBaseEntity {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id;
-        if (Array.isArray(this.domainEvents)) {
-            data["domainEvents"] = [];
-            for (let item of this.domainEvents)
-                data["domainEvents"].push(item.toJSON());
-        }
         return data;
     }
 }
 
 export interface IBaseEntity {
     id?: number;
-    domainEvents?: BaseEvent[];
 }
 
 export class TestCase extends BaseEntity implements ITestCase {
@@ -1497,34 +1497,6 @@ export interface IContest extends IBaseAuditableEntity {
     description?: string | undefined;
 }
 
-export abstract class BaseEvent implements IBaseEvent {
-
-    constructor(data?: IBaseEvent) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-    }
-
-    static fromJS(data: any): BaseEvent {
-        data = typeof data === 'object' ? data : {};
-        throw new Error("The abstract class 'BaseEvent' cannot be instantiated.");
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        return data;
-    }
-}
-
-export interface IBaseEvent {
-}
-
 export class Submission extends BaseAuditableEntity implements ISubmission {
     code?: string;
     language?: ProgramingLanguage;
@@ -1608,6 +1580,7 @@ export enum SubmissionStatus {
     RuntimeError = 5,
     InternalError = 6,
     CompileError = 7,
+    Rejected = 8,
 }
 
 export class Editorial extends BaseAuditableEntity implements IEditorial {

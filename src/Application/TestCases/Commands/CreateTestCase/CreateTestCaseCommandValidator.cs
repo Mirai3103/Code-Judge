@@ -7,8 +7,8 @@ public class CreateTestCaseCommandValidator: AbstractValidator<CreateTestCaseCom
     public CreateTestCaseCommandValidator()
     {
         RuleFor(v => v.Input)
-            .NotEmpty().WithMessage("Input is required.")
-            .MaximumLength(200).WithMessage("Input must not exceed 200 characters.");
+            .NotEmpty().WithMessage("Input is required.");
+          
         RuleFor(v => v.Output)
             .NotEmpty().WithMessage("Output is required.")
             .MaximumLength(200).WithMessage("Output must not exceed 200 characters.");

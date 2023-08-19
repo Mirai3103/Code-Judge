@@ -21,26 +21,12 @@ public class ExecuteCppStrategy : BaseExecuteCodeStrategy
         _executeCodePath = _configuration["ExecuteCodePath"] ?? throw new InvalidOperationException();
     }
 
-    public override async Task<ExecuteCodeResult> ExecuteCodeAsync(string code, string input, string expectedOutput,
-        int timeLimit, float memoryLimit)
+    public override async Task<ExecuteCodeResult> ExecuteAsync(string fileName, string input, string expectedOutput,
+        int timeLimit, float memoryLimit, CancellationToken cancellationToken = default)
     {
-        var executionFilename = Guid.NewGuid().ToString();
-        var isSuccessful = await CompileCodeAsync(code, executionFilename);
-        if (!isSuccessful)
-        {
-            return new ExecuteCodeResult()
-            {
-                ExitCode = 1,
-                Error = "Compilation Error",
-                Status = SubmissionStatus.CompileError,
-                IsSuccess = false,
-                MemoryUsage = 0,
-                TimeElapsed = 0,
-            };
-        }
-
+      
         // todo: execute 
-        var fileExecutePath = Path.Combine(_executeCodePath, executionFilename + _executeFileExtension);
+        var fileExecutePath = Path.Combine(_executeCodePath, fileName + _executeFileExtension);
        
         var process = new Process()
         {
@@ -59,17 +45,21 @@ public class ExecuteCppStrategy : BaseExecuteCodeStrategy
         };
         return await WatchProcess(process,input,expectedOutput,timeLimit,memoryLimit);
     }
-    private async Task<bool> CompileCodeAsync(string code, string executionFilename)
+    public override async Task<CompileResult> CompileCodeAsync(string code, CancellationToken cancellationToken = default)
     {
-        var filePath = Path.Combine(_executeCodePath, executionFilename + FileExtension);
-        await File.WriteAllTextAsync(filePath, code);
+        var compilationResult = new CompileResult()
+        {
+            IsSuccess = true,
+        };
+        var filePath = Path.Combine(_executeCodePath, compilationResult.FileName + FileExtension);
+        await File.WriteAllTextAsync(filePath, code, cancellationToken);
         var process = new Process()
         {
             StartInfo =
             {
                 FileName = "g++",
                 Arguments =
-                    $"{executionFilename + FileExtension} -o {executionFilename}{_executeFileExtension}",
+                    $"{compilationResult.FileName + FileExtension} -o {compilationResult.FileName}{_executeFileExtension}",
                 WorkingDirectory = _executeCodePath,
                 UseShellExecute = false,
                 CreateNoWindow = true,
@@ -79,12 +69,12 @@ public class ExecuteCppStrategy : BaseExecuteCodeStrategy
         };
         process.Start();
      
-        await process.WaitForExitAsync();
+        await process.WaitForExitAsync(cancellationToken);
         if (process.ExitCode != 0)
         {
-            return false;
+            compilationResult.IsSuccess = false;
         }
 
-        return true;
+        return compilationResult;
     }
 }

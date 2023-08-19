@@ -711,6 +711,17 @@
             "type": "integer",
             "format": "int32"
           },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
           "difficultyLevel": {
             "$ref": "#/components/schemas/DifficultyLevel"
           }
@@ -982,19 +993,8 @@
           "id": {
             "type": "integer",
             "format": "int32"
-          },
-          "domainEvents": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BaseEvent"
-            }
           }
         }
-      },
-      "BaseEvent": {
-        "type": "object",
-        "x-abstract": true,
-        "additionalProperties": false
       },
       "Submission": {
         "allOf": [
@@ -1072,7 +1072,8 @@
           "TimeLimitExceeded",
           "RuntimeError",
           "InternalError",
-          "CompileError"
+          "CompileError",
+          "Rejected"
         ],
         "enum": [
           0,
@@ -1082,7 +1083,8 @@
           4,
           5,
           6,
-          7
+          7,
+          8
         ]
       },
       "Editorial": {
@@ -1119,7 +1121,6 @@
         "properties": {
           "input": {
             "type": "string",
-            "maxLength": 200,
             "minLength": 1,
             "nullable": false
           },

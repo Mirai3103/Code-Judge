@@ -11,5 +11,8 @@ public class ProblemBriefDto:IMapFrom<Problem>
     public string Name { get; set; } = null!;
     public string Slug { get; set; } = null!;
     public int Points { get; set; }
+    public int Id { get; set; }
+    public DateTime Created { get; set; }
+    public string CreatedBy { get; set; } = null!;
     public DifficultyLevel DifficultyLevel { get; set; }
 }

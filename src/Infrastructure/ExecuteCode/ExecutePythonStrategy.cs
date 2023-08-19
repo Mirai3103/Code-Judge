@@ -15,17 +15,15 @@ public class ExecutePythonStrategy:BaseExecuteCodeStrategy
         var os = Environment.OSVersion;
         _executeCodePath = _configuration["ExecuteCodePath"] ?? throw new InvalidOperationException();
     }
-    public override Task<ExecuteCodeResult> ExecuteCodeAsync(string code, string input, string expectedOutput, int timeLimit, float memoryLimit)
+    public override Task<ExecuteCodeResult> ExecuteAsync(string fileName, string input, string expectedOutput, int timeLimit, float memoryLimit, CancellationToken cancellationToken = default)
     {
-        var executionFilename = Guid.NewGuid().ToString()+FileExtension;
-        var fileExecutePath = Path.Combine(_executeCodePath, executionFilename);
-        File.WriteAllText(fileExecutePath,code);
+    
         Process process = new ()
         {
             StartInfo =
             {
                 FileName = "python3",
-                Arguments = fileExecutePath,
+                Arguments = fileName+FileExtension,
                 WorkingDirectory = _executeCodePath,
                 UseShellExecute = false,
                 CreateNoWindow = true,
@@ -35,6 +33,17 @@ public class ExecutePythonStrategy:BaseExecuteCodeStrategy
                 
             },
         };
-        return WatchProcess(process,input,expectedOutput,timeLimit,memoryLimit);
+        return WatchProcess(process,input,expectedOutput,timeLimit,memoryLimit, cancellationToken);
+    }
+
+    public override async Task<CompileResult> CompileCodeAsync(string code, CancellationToken cancellationToken = default)
+    {
+        var compilationResult = new CompileResult()
+        {
+            IsSuccess = true,
+        };
+        var filePath = Path.Combine(_executeCodePath, compilationResult.FileName + FileExtension);
+        await File.WriteAllTextAsync(filePath, code, cancellationToken);
+        return compilationResult;
     }
 }

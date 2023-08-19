@@ -10,7 +10,7 @@ public class CreateProblemCommandValidator : AbstractValidator<CreateProblemComm
             .MinimumLength(50)
             .NotEmpty();
         RuleFor(v => v.Name)
-            .MaximumLength(10)
+            .MinimumLength(10)
             .MaximumLength(200)
             .NotEmpty();
         RuleFor(v => v.MemoryLimit).GreaterThan(0)

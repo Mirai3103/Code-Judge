@@ -7,6 +7,8 @@ namespace Code_Judge.Infrastructure.ExecuteCode;
 
 public abstract class BaseExecuteCodeStrategy:IExecuteCodeStrategy
 {
+    private IExecuteCodeStrategy _executeCodeStrategyImplementation;
+
     protected async Task<float> WatchMemory(Process process, long maxMemoryUsageInBytes)
     {
         var memoryUsageInBytes = 0L;
@@ -29,7 +31,7 @@ public abstract class BaseExecuteCodeStrategy:IExecuteCodeStrategy
     }
 
     public async Task<ExecuteCodeResult> WatchProcess(Process process, string input, string expectedOutput,
-        int timeLimit, float memoryLimit)
+        int timeLimit, float memoryLimit, CancellationToken cancellationToken = default)
     {
         var result = new ExecuteCodeResult();
         var maxMemoryUsageInBytes = (long)(memoryLimit * 1024 * 1024);
@@ -68,7 +70,7 @@ public abstract class BaseExecuteCodeStrategy:IExecuteCodeStrategy
             result.Status = SubmissionStatus.RuntimeError;
             result.Error = await error;
         }
-        else if (await output != expectedOutput)
+        else if ((await output).Trim() != expectedOutput.Trim())
         {
             result.Status = SubmissionStatus.WrongAnswer;
         }
@@ -84,5 +86,6 @@ public abstract class BaseExecuteCodeStrategy:IExecuteCodeStrategy
         return result;
     }
 
-    public abstract Task<ExecuteCodeResult> ExecuteCodeAsync(string code, string input, string expectedOutput, int timeLimit, float memoryLimit);
+    public abstract Task<ExecuteCodeResult> ExecuteAsync(string fileName, string input, string expectedOutput, int timeLimit, float memoryLimit, CancellationToken cancellationToken = default);
+    public abstract Task<CompileResult> CompileCodeAsync(string code, CancellationToken cancellationToken = default);
 }
