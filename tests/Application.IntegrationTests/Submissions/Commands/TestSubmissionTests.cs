@@ -1,4 +1,5 @@
-﻿using Code_Judge.Application.Submissions.TestSubmission;
+﻿using Code_Judge.Application.Problems.Queries.GetProblemBySlug;
+using Code_Judge.Application.Submissions.TestSubmission;
 using Code_Judge.Domain.Enums;
 using NUnit.Framework;
 
@@ -55,8 +56,9 @@ int main() {
     return 0;
 }";
 
-
-        var request = new TestSubmissionCommand() { ProblemId = 12, Code = cppCode, Language = ProgramingLanguage.Cpp };
+        var problem = await Testing.SendAsync(new GetProblemBySlugQuery("two-sum"));
+        Assert.That(problem, Is.Not.Null);
+        var request = new TestSubmissionCommand() { ProblemId =problem!.Id, Code = cppCode, Language = ProgramingLanguage.Cpp };
         var result =await Testing.SendAsync(request);
 
         // Act & Assert
