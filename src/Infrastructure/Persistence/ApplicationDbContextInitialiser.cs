@@ -1,4 +1,6 @@
-﻿using Code_Judge.Domain.Entities;
+﻿using System.Text.Json;
+using Code_Judge.Domain.Entities;
+using Code_Judge.Domain.Enums;
 using Code_Judge.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -91,5 +93,38 @@ public class ApplicationDbContextInitialiser
 
             await _context.SaveChangesAsync();
         }
+
+        if (!_context.Problems.Any())
+        {
+            //start transaction
+            var transaction = await _context.Database.BeginTransactionAsync();
+            var problem = new Problem
+            {
+                IsPublic = true,
+                Name = "Bài toán Two Sum",
+                Description = "### Bài toán Two Sum\n\nCho một mảng các số nguyên và một giá trị mục tiêu (target), hãy tìm hai số trong mảng mà tổng của chúng bằng giá trị mục tiêu.\n\n**Đầu vào:**\n- n: số lượng phần tử trong mảng\n- n phần tử tiếp theo: các phần tử của mảng\n- target: giá trị mục tiêu\n\n**Đầu ra:**\n- Hai chỉ số của mảng mà tổng của hai phần tử tại các chỉ số đó bằng giá trị mục tiêu, cách nhau bằng một dấu cách.",
+                Points = 1,
+                DifficultyLevel = DifficultyLevel.Easy,
+                Hint = "Hãy thử sử dụng một bảng băm để lưu trữ các giá trị bù của mỗi phần tử.",
+                TimeLimit = 1,
+                MemoryLimit = 1,
+                Slug = "two-sum",
+            };
+            await _context.Problems.AddAsync(problem);
+            await _context.SaveChangesAsync();
+            var testcaseJsonPath = "E:\\projects\\Code-Judge\\src\\Infrastructure\\Persistence\\Migrations\\testcase.json";
+            var testcaseJson = await File.ReadAllTextAsync(testcaseJsonPath);
+            var testcases = JsonSerializer.Deserialize<List<TestCase>>(testcaseJson)??throw new Exception("Cannot deserialize testcases");
+            foreach (var testcase in testcases)
+            {
+                testcase.ProblemId = problem.Id;
+                await _context.TestCases.AddAsync(testcase);
+            }
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            
+            
+        }
     }
 }
+

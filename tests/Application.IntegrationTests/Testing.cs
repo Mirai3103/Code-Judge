@@ -39,6 +39,8 @@ public partial class Testing
             TablesToIgnore = new Respawn.Graph.Table[] { "__EFMigrationsHistory" },
             DbAdapter =  DbAdapter.MySql,
         }).GetAwaiter().GetResult();
+        var _dbContext = _factory.Services.GetRequiredService<ApplicationDbContextInitialiser>();
+        _dbContext.SeedAsync().GetAwaiter().GetResult();
     }
 
     public static async Task<TResponse> SendAsync<TResponse>(IRequest<TResponse> request)

@@ -1,5 +1,7 @@
 ﻿using FluentValidation;
+using FluentValidation.Results;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using ValidationException = Code_Judge.Application.Common.Exceptions.ValidationException;
 
 namespace Code_Judge.Application.Common.Behaviours;
@@ -28,7 +30,7 @@ public class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavior<TReque
                 .Where(r => r.Errors.Any())
                 .SelectMany(r => r.Errors)
                 .ToList();
-
+    
             if (failures.Any())
                 throw new ValidationException(failures);
         }

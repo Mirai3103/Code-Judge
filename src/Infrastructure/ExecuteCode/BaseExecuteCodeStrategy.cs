@@ -7,7 +7,6 @@ namespace Code_Judge.Infrastructure.ExecuteCode;
 
 public abstract class BaseExecuteCodeStrategy:IExecuteCodeStrategy
 {
-    private IExecuteCodeStrategy _executeCodeStrategyImplementation;
 
     protected async Task<float> WatchMemory(Process process, long maxMemoryUsageInBytes)
     {

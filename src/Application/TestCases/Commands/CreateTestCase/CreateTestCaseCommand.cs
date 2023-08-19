@@ -1,4 +1,5 @@
-﻿using Code_Judge.Application.Common.Interfaces;
+﻿using Code_Judge.Application.Common.Exceptions;
+using Code_Judge.Application.Common.Interfaces;
 using Code_Judge.Domain.Entities;
 using MediatR;
 
@@ -23,6 +24,7 @@ public class CreateTestCaseCommandHandler : IRequestHandler<CreateTestCaseComman
 
     public async Task<int> Handle(CreateTestCaseCommand request, CancellationToken cancellationToken)
     {
+        var problem = await _context.Problems.FindAsync(request.ProblemId)??throw new NotFoundException(nameof(Problem), request.ProblemId);
         var entity = new TestCase()
         {
             Input = request.Input, Output = request.Output, ProblemId = request.ProblemId, IsHidden = request.IsHidden,
