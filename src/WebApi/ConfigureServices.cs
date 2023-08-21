@@ -1,11 +1,17 @@
 ﻿using Code_Judge.Application.Common.Interfaces;
+using Code_Judge.Domain.Entities;
 using Code_Judge.Infrastructure.Persistence;
 using Code_Judge.WebUI.Services;
 using Microsoft.AspNetCore.Mvc;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using ZymLabs.NSwag.FluentValidation;
-
+using Duende.IdentityServer;
+using Duende.IdentityServer.Models;
+using IdentityServer4.AccessTokenValidation;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
 namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ConfigureServices
@@ -35,6 +41,45 @@ public static class ConfigureServices
             return new FluentValidationSchemaProcessor(provider, validationRules, loggerFactory);
         });
 
+        services.AddIdentityServer();
+        .AddApiAuthorization<ApplicationUser, ApplicationDbContext>()
+        
+        .AddInMemoryIdentityResources(new IdentityResource[]
+        {
+            new IdentityResources.OpenId(), new IdentityResources.Profile(),
+        })
+        .AddInMemoryApiResources(new ApiResource[] { new ApiResource("api", "Code_Judge API")
+        {
+            Enabled = true,
+            Scopes = new List<string> { "api.read", "api.write" },
+        } })
+        .AddInMemoryApiScopes(new ApiScope[] { new ApiScope("api.read"), new ApiScope("api.write"), })
+        .AddInMemoryClients(new Client[]
+        {
+            new()
+            {
+                ClientId = "swagger",
+                ClientSecrets = { new Secret("a".Sha256()) },
+                AllowedScopes =
+                {
+                    IdentityServerConstants.StandardScopes.OpenId,
+                    IdentityServerConstants.StandardScopes.Profile,
+                    "api.read",
+                    "api.write",
+                    IdentityServerConstants.StandardScopes.OfflineAccess,
+                    "api"
+                },
+                AllowedGrantTypes = GrantTypes.Implicit,
+                AllowAccessTokensViaBrowser = true,
+                AllowOfflineAccess = true,
+                RedirectUris = {"https://localhost:5251/api/oauth2-redirect.html"},
+                PostLogoutRedirectUris ={"https://localhost:5251/api/oauth2-redirect.html"},
+                AllowedCorsOrigins = {"https://localhost:5251"},
+            },
+        })
+        .AddProfileService<ProfileService>()
+        .AddDeveloperSigningCredential()
+        ;
         // Customise default API behaviour
         services.Configure<ApiBehaviorOptions>(options =>
             options.SuppressModelStateInvalidFilter = true);
