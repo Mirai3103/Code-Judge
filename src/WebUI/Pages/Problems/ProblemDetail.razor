@@ -1,0 +1,231 @@
+﻿@page "/Problems/{Slug}"
+@using Code_Judge.Domain.Entities
+@using MediatR
+@using Code_Judge.Application.Problems.Queries.GetProblemBySlug
+@using BlazorMonaco
+@using BlazorMonaco.Editor
+@using Code_Judge.Application.Common.Models
+@using Code_Judge.Application.Submissions.TestSubmission
+@using Code_Judge.Application.TestCases.Queries.GetTestCases
+@using Code_Judge.Domain.Enums
+@using Microsoft.IdentityModel.Tokens
+@if (Problem is not null)
+{
+    <div class="flex justify-evenly h-[calc(100vh-70px)]  w-full ">
+        <div class="prose grow  min-w-[46vw] h-[calc(100vh-70px)] py-6 overflow-y-scroll px-2">
+            <h2>@($"{Problem.Id} - {Problem.Name}")</h2>
+            @((MarkupString)Markdig.Markdown.ToHtml(Problem.Description))
+        </div>
+        <div class="w-1/2">
+
+            <div class="h-[calc(100vh-70px)] py-2 flex gap-y-2 flex-col">
+                <div class="m-1 gap-x-5 flex">
+                    <div className="form-control w-full max-w-xs">
+                        <label className="label">
+                            <span className="label-text">
+                                Language
+                            </span>
+                        </label>
+                        <InputSelect className="select select-bordered" @bind-Value="Language">
+                            @foreach (ProgramingLanguage language in Enum.GetValues(typeof(ProgramingLanguage)))
+                            {
+                                <option value="@language">@language.ToFriendlyString()</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <div className="form-control w-full max-w-xs">
+                        <label className="label">
+                            <span className="label-text">
+                                Theme
+                            </span>
+                        </label>
+                        <InputSelect className="select select-bordered" @bind-Value="Theme">
+                            <option value="vs-dark">
+                                Dark
+                            </option>
+                            <option value="vs">
+                                Light
+                            </option>
+                        </InputSelect>
+                    </div>
+                </div>
+                <StandaloneCodeEditor @ref="StandaloneCodeEditorRef" CssClass="h-full grow" Id="my-editor-instance-id" ConstructionOptions="EditorConstructionOptions"/>
+                <div class="flex justify-end gap-x-2">
+                    <button class="btn-ghost btn btn-secondary" @onclick="Run">
+                        Run
+                    </button>
+                    <button class="btn-secondary btn">
+                        Submit
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <dialog id="@_runModalId.ToString()" class="modal">
+        <form method="dialog" class="modal-box p-4 rounded-2xl">
+            <h3 class="font-bold text-lg">
+                Running...
+            </h3>
+            @if (Results.Count() > 0)
+            {
+                foreach (var result in Results)
+                {
+                    <div class="collapse my-2 collapse-arrow bg-base-200">
+                        <input type="radio" name="testrunning"/>
+                        <div class="collapse-title text-xl font-medium">
+                            @($"Test Case #{result.TestCase!.Id} ")
+                            @if (result.Status == SubmissionStatus.Running)
+                            {
+                                <span class="loading ml-2 loading-spinner loading-sm"></span>
+                            }
+                            else
+                            {
+                                <span class="@(result.Status==SubmissionStatus.Accepted ? "text-green-500" : "text-red-500")">
+                                  - @result.Status.ToFriendlyString()
+                                </span>
+                            }
+                        </div>
+                        <div class="collapse-content prose">
+                            <h4>
+                                Input
+                            </h4>
+                            <pre class="overflow-x-auto">
+                                @result.TestCase.Input
+                            </pre>
+
+                            <h4>
+                                Expected Output
+                            </h4>
+                            <pre class="overflow-x-auto">
+                                @result.TestCase.Output
+                            </pre>
+                            <h4>
+                                Actual Output
+                            </h4>
+                            <pre class="overflow-x-auto">
+                                    @if (result.Status == SubmissionStatus.Running)
+                                    {
+                                        <span className="loading loading-dots loading-xs"></span>
+                                    }
+                                    else
+                                    {
+                                        @result.Output
+                                    }
+                            </pre>
+                        </div>
+                    </div>
+                }
+            }
+            <div class="modal-action">
+                <button class="btn">Close</button>
+            </div>
+        </form>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
+}
+
+@code {
+    private Guid _runModalId = Guid.NewGuid();
+
+    [Parameter]
+    public string? Slug { get; set; }
+
+    private Problem? Problem { get; set; }
+
+    [Inject]
+    public IMediator _mediator { get; set; } = default!;
+
+    [Inject]
+    public NavigationManager _navigationManager { get; set; } = default!;
+
+    [Inject]
+    public IJSRuntime _jsRuntime { get; set; } = default!;
+
+    private IEnumerable<ExecuteCodeResult> Results { get; set; } = new List<ExecuteCodeResult>();
+    private IEnumerable<TestCase> TestCases { get; set; } = null!;
+    private ProgramingLanguage _language = ProgramingLanguage.Cpp;
+
+    private ProgramingLanguage Language
+    {
+        get => _language;
+        set
+        {
+            this.OnLanguageChanged(value).GetAwaiter();
+            _language = value;
+        }
+    }
+
+    private string _theme = "vs-dark";
+    private string Theme
+    {
+        get => _theme;
+        set
+        {
+               this.OnThemeChange(value).GetAwaiter();
+            _theme = value;
+            
+        }
+    } 
+    
+
+    private StandaloneCodeEditor StandaloneCodeEditorRef { get; set; } = default!;
+
+    private async Task OnLanguageChanged(ProgramingLanguage language)
+    {
+        var model = await StandaloneCodeEditorRef.GetModel();
+        await Global.SetModelLanguage(model, language.ToMonacoId());
+    }
+
+    private async Task OnThemeChange(string Theme)
+    {
+        await Global.SetTheme(Theme);
+    }
+
+    private StandaloneEditorConstructionOptions EditorConstructionOptions(StandaloneCodeEditor editor)
+    {
+        return new StandaloneEditorConstructionOptions
+        {
+            AutomaticLayout = true,
+            Language = Language.ToFriendlyString(),
+            Value = "",
+            Theme = "vs-dark"
+        };
+    }
+    
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Slug is null) _navigationManager.NavigateTo("/");
+        var command = new GetProblemBySlugQuery(Slug);
+        Problem = await _mediator.Send(command);
+        if (Problem is null)
+        {
+            _navigationManager.NavigateTo("/");
+        }
+        var testCasesCommand = new GetPublishTestCasesQuery(Problem!.Id);
+        TestCases = await _mediator.Send(testCasesCommand);
+      
+    }
+
+    private async Task Run()
+    {
+        Results = TestCases.Select(t => new ExecuteCodeResult() { Status = SubmissionStatus.Running, TestCase = t });
+        var testSubmission = new TestSubmissionCommand()
+        {
+            Language = Language,
+            Code = await StandaloneCodeEditorRef.GetValue(),
+            ProblemId = Problem!.Id
+        };
+        var results =  _mediator.Send(testSubmission);
+        await _jsRuntime.InvokeVoidAsync("showModal", _runModalId.ToString());
+        Results = await results;
+    }
+
+    private async Task Close()
+    {
+        await _jsRuntime.InvokeVoidAsync("closeModal", _runModalId.ToString());
+    }
+
+}

@@ -1,0 +1,30 @@
+﻿@using Code_Judge.WebUi.Services
+@using Code_Judge.WebUi.Dto
+@inject IToastService ToastService
+@namespace WebUi.Components.Toast
+<div class="toast toast-end z-50">
+   @foreach (var toast in Toasts)
+   {
+       <div class="alert shadow-md @toast.Level.ToCssClass()">
+           <span>@toast.Message</span>
+       </div>
+   }
+</div>
+@code {
+    private List<ToastProps> Toasts { get; set; } = new ();
+    protected override void OnInitialized()
+    {
+       ToastService.OnShow += ShowToast;
+    }
+
+    private void ShowToast(ToastProps toast)
+    {
+        Toasts.Add(toast);
+        Task.Delay(toast.Duration).ContinueWith(_ =>
+        {
+            Toasts.Remove(toast);
+            InvokeAsync(StateHasChanged);
+        });
+        StateHasChanged();
+    }
+}

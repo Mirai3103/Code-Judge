@@ -6,3 +6,16 @@ public enum DifficultyLevel
     Medium = 1,
     Hard = 2
 }
+public static class DifficultyLevelExtensions
+{
+    public static string ToFriendlyString(this DifficultyLevel me)
+    {
+        return me switch
+        {
+            DifficultyLevel.Easy => "Dễ",
+            DifficultyLevel.Medium => "Trung bình",
+            DifficultyLevel.Hard => "Khó",
+            _ => throw new ArgumentOutOfRangeException(nameof(me), me, null)
+        };
+    }
+}

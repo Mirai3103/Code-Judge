@@ -5,9 +5,8 @@ using Code_Judge.Domain.Enums;
 
 namespace Code_Judge.Infrastructure.ExecuteCode;
 
-public abstract class BaseExecuteCodeStrategy:IExecuteCodeStrategy
+public abstract class BaseExecuteCodeStrategy : IExecuteCodeStrategy
 {
-
     protected async Task<float> WatchMemory(Process process, long maxMemoryUsageInBytes)
     {
         var memoryUsageInBytes = 0L;
@@ -17,11 +16,13 @@ public abstract class BaseExecuteCodeStrategy:IExecuteCodeStrategy
             {
                 memoryUsageInBytes = process.PeakVirtualMemorySize64;
             }
+
             if (memoryUsageInBytes > maxMemoryUsageInBytes)
             {
                 process.Kill();
                 break;
             }
+
             Console.WriteLine(memoryUsageInBytes);
             await Task.Delay(100);
         }
@@ -79,12 +80,14 @@ public abstract class BaseExecuteCodeStrategy:IExecuteCodeStrategy
         }
 
         result.MemoryUsage = 0;
-
+        result.Output = await output;
 
         result.TimeElapsed = (int)executionTimeInMs;
         return result;
     }
 
-    public abstract Task<ExecuteCodeResult> ExecuteAsync(string fileName, string input, string expectedOutput, int timeLimit, float memoryLimit, CancellationToken cancellationToken = default);
+    public abstract Task<ExecuteCodeResult> ExecuteAsync(string fileName, string input, string expectedOutput,
+        int timeLimit, float memoryLimit, CancellationToken cancellationToken = default);
+
     public abstract Task<CompileResult> CompileCodeAsync(string code, CancellationToken cancellationToken = default);
 }

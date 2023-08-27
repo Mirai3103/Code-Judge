@@ -1,0 +1,118 @@
+﻿@using Code_Judge.Application.TestCases.Commands.CreateTestCase
+@using Blazored.FluentValidation
+@using MediatR
+@using System.Text.Json
+@using Code_Judge.Domain.Entities
+@using Code_Judge.WebUi.Services
+<dialog id="@Id.ToString()" class="modal">
+    <div method="dialog" class="modal-box">
+        <h3 class="font-bold text-lg">
+            Create Test Case
+        </h3>
+        <EditForm Model="@Command" OnSubmit="@OnSubmit">
+            <input type="number" hidden @bind="Command.ProblemId" readonly/>
+            <FluentValidationValidator @ref="FluentValidationValidator"/>
+            <div class="form-control">
+                <label class="cursor-pointer justify-start gap-x-2 label">
+                    <InputCheckbox @bind-Value="@Command.IsHidden" class="checkbox checkbox-secondary"/>
+                    <span class="label-text">
+                        Hidden ?
+                    </span>
+       
+                </label>
+            </div>
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">
+                        Test Input
+                        <sup class="text-red-500">*</sup>
+                    </span>
+                </label>
+                <textarea class="textarea textarea-bordered h-24" @bind="@Command.Input" placeholder="Input"></textarea>
+                <label class="label">
+                    <span class="label-text-alt text-error">
+                        <ValidationMessage For="@(() => Command.Input)"/>
+                    </span>
+                </label>
+            </div>
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">
+                        Test Input
+                        <sup class="text-red-500">*</sup>
+                    </span>
+                </label>
+                <textarea class="textarea textarea-bordered h-24" placeholder="Output" @bind="@Command.Output"></textarea>
+                <label class="label">
+                    <span class="label-text-alt text-error">
+                        <ValidationMessage For="@(() => Command.Output)"/>
+                    </span>
+                </label>
+            </div>
+            <div class="flex justify-end">
+                <div class="btn-group ">
+                    <button class="btn btn-ghost" type="reset" @onclick="@OnClose">
+                        Cancel
+                    </button>
+
+                    <button class="btn btn-primary" type="submit">Create</button>
+                </div>
+            </div>
+        </EditForm>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
+
+@code {
+
+    [Parameter]
+    public Guid Id { get; set; }
+    [Inject]
+    private IToastService ToastService { get; set; } = null!;
+    [Parameter]
+    public int ProblemId { get; set; }
+    [Inject]
+    private IJSRuntime JsRuntime { get; set; } = null!;
+    private CreateTestCaseCommand Command { get; } = new();
+    private FluentValidationValidator FluentValidationValidator { get; set; } = null!;
+    [Inject]
+    private IMediator Mediator { get; set; } = null!;
+    protected override Task OnParametersSetAsync()
+    {
+       Command.ProblemId = ProblemId;
+        return base.OnParametersSetAsync();
+    }
+
+    private async Task OnSubmit()
+    {
+        var result = await FluentValidationValidator.ValidateAsync();
+        Command.ProblemId = ProblemId;
+        Console.WriteLine(JsonSerializer.Serialize(Command));
+
+        if (result)
+        {
+            var response = await Mediator.Send(Command);
+            OnClose();
+            OnTestCaseCreated?.Invoke(new TestCase()
+            {
+                Id = response,
+                Input = Command.Input,
+                IsHidden = Command.IsHidden,
+                Output = Command.Output,
+            });
+            ToastService.Success("Test Case Created Successfully");
+            this.Command.Input = "";
+            this.Command.Output = "";
+            this.Command.IsHidden = false;
+        }
+    }
+    private void OnClose()
+    {
+        JsRuntime.InvokeVoidAsync("closeModal", Id.ToString());
+    }
+    [Parameter]
+    public  Action<TestCase> OnTestCaseCreated { get; set; }
+    
+}

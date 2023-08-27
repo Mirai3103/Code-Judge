@@ -9,14 +9,14 @@ using MediatR;
 
 namespace Code_Judge.Application.Submissions.CreateSubmission;
 
-public record CreateSubmissionCommand:IRequest<IEnumerable<ExecuteCodeResult>>
+public record CreateSubmissionCommand:IRequest<CreateSubmissionResult>
 {
     public int ProblemId { get; init; }
     public string Code { get; init; } = null!;
     public ProgramingLanguage Language { get; init; }
 }
 
-public class CreateSubmissionCommandHandler : IRequestHandler<CreateSubmissionCommand, IEnumerable<ExecuteCodeResult>>
+public class CreateSubmissionCommandHandler : IRequestHandler<CreateSubmissionCommand, CreateSubmissionResult>
 {
     private readonly IExecuteCodeStrategyFactory _executeCodeStrategyFactory;
     private readonly IMediator _mediator;
@@ -28,7 +28,7 @@ public class CreateSubmissionCommandHandler : IRequestHandler<CreateSubmissionCo
         _context = context;
     }
 
-    public async Task<IEnumerable<ExecuteCodeResult>> Handle(CreateSubmissionCommand request, CancellationToken cancellationToken)
+    public async Task<CreateSubmissionResult> Handle(CreateSubmissionCommand request, CancellationToken cancellationToken)
     {
         var executeCodeStrategy = _executeCodeStrategyFactory.GetExecuteCodeStrategy(request.Language);
         var listTestCases = await _mediator.Send(new GetTestCasesQuery(request.ProblemId),cancellationToken);
@@ -40,15 +40,23 @@ public class CreateSubmissionCommandHandler : IRequestHandler<CreateSubmissionCo
         var compileResult = await executeCodeStrategy.CompileCodeAsync(request.Code,cancellationToken);
         if (!compileResult.IsSuccess)
         {
-            return listTestCases.Select(testCase => new ExecuteCodeResult
+            var newSubmission = new Submission
             {
+                Code = request.Code,
+                Language = request.Language,
+                ProblemId = request.ProblemId,
+                Memory = 0,
+                RunTime = 0,
                 Status = SubmissionStatus.CompileError,
-                MemoryUsage = 0,
-                TimeElapsed = 0,
-                IsSuccess = false,
-                Error = "Compile Error",
-                ExitCode = -1
-            });
+                Error = compileResult.Error,
+                
+            };
+            await _context.Submissions.AddAsync(newSubmission,cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+            return new CreateSubmissionResult
+            {
+              Submission =  newSubmission,
+            };
         }
         var executeCodeTasks = listTestCases.Select(testCase => Execute(executeCodeStrategy,compileResult.FileName,testCase,problem));
    
@@ -69,7 +77,11 @@ public class CreateSubmissionCommandHandler : IRequestHandler<CreateSubmissionCo
             Status =  status,
         };
        await  _context.Submissions.AddAsync(submission,cancellationToken);
-       return result;
+       return new  CreateSubmissionResult
+       {
+           Submission = submission,
+           ExecuteCodeResults = result
+       };
     }
     private async Task<ExecuteCodeResult> Execute(IExecuteCodeStrategy executeCodeStrategy,string fileName,TestCase testCase,Problem problem)
     {

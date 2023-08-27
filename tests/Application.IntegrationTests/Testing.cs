@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MySql.Data.MySqlClient;
 using NUnit.Framework;
 using Respawn;
+using WebUi;
 
 namespace Code_Judge.Application.IntegrationTests;
 

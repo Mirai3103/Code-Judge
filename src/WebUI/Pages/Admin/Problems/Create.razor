@@ -1,0 +1,161 @@
+﻿@page "/Admin/Problems/Create"
+@using Code_Judge.Application.Problems.Commands.CreateProblem
+@using Code_Judge.Domain.Enums
+@using Blazored.FluentValidation;
+@using System.Text.Json
+@using Code_Judge.WebUi.Services
+@using MediatR
+@layout AdminLayout
+<h1 class="text-2xl font-semibold my-2">
+    Create new Problem
+</h1>
+<EditForm Model="@_command" OnSubmit="@SubmitFormAsync" class="flex flex-col gap-y-2 m-4 ">
+    <FluentValidationValidator @ref="_fluentValidationValidator"/>
+    <div class="form-control w-full">
+        <label class="label">
+            <span class="label-text">
+                Name
+
+                <sup class="text-red-500">*</sup>
+            </span>
+        </label>
+        <input type="text" class="input input-bordered w-full " @bind="_command.Name" placeholder="Name"/>
+        <label class="label">
+
+            <span class="label-text-alt text-error">
+                <ValidationMessage For="@(() => _command.Name)"/>
+            </span>
+        </label>
+    </div>
+    <div class="form-control">
+        <label class="label cursor-pointer justify-start gap-x-2">
+            <InputCheckbox @bind-Value="_command.IsPublic" class=" checkbox"/>
+
+            <span class="label-text">
+                Is Public ?
+            </span>
+
+        </label>
+    </div>
+
+    <div class="form-control w-full ">
+        <label class="label">
+            <span class="label-text">
+                Difficulty Level
+                <sup class="text-red-500">
+                    *
+                </sup>
+            </span>
+        </label>
+        <select class="select select-bordered" @bind="_command.DifficultyLevel">
+            @foreach (DifficultyLevel level in Enum.GetValues(typeof(DifficultyLevel)))
+            {
+                <option value="@level">@level.ToFriendlyString()</option>
+            }
+        </select>
+    </div>
+    <div class="form-control">
+        <label class="label">
+            <span class="label-text">
+                Points
+            </span>
+        </label>
+        <InputNumber class="input input-bordered w-full "  @bind-Value="_command.Points" placeholder="Points"/>
+        <label class="label">
+
+            <span class="label-text-alt text-error">
+                <ValidationMessage For="@(() => _command.Points)"/>
+            </span>
+        </label>
+    </div>
+    <div class="form-control">
+        <label class="label">
+            <span class="label-text">
+                Points
+            </span>
+        </label>
+        <MarkdownEditor @bind-Value="_command.Description"/>
+        <label class="label">
+            <span class="label-text-alt text-error">
+                <ValidationMessage For="@(() => _command.Description)"/>
+            </span>
+        </label>
+    </div>
+    <div class="form-control">
+        <label class="label">
+            <span class="label-text">
+                Hint
+            </span>
+        </label>
+        <textarea class="textarea textarea-bordered h-16" placeholder="Hint" @bind="_command.Hint"></textarea>
+    </div>
+    <div class="grid-cols-2 grid gap-x-2">
+        <div class="form-control">
+            <label class="label">
+                <span class="label-text">
+                    Time Limit (ms)
+                    <sup class="text-red-500">
+                        *
+                    </sup>
+                </span>
+            </label>
+            <InputNumber class="input input-bordered w-full "  @bind-Value="_command.TimeLimit" placeholder="Time Limit"/>
+            <label class="label">
+
+                <span class="label-text-alt text-error">
+                    <ValidationMessage For="@(() => _command.TimeLimit)"/>
+                </span>
+            </label>
+        </div>
+        <div class="form-control">
+            <label class="label">
+                <span class="label-text">
+                    Memory Limit (MB)
+                    <sup class="text-red-500">
+                        *
+                    </sup>
+                </span>
+            </label>
+            <InputNumber class="input input-bordered w-full " @bind-Value="_command.MemoryLimit" placeholder="Memory Limit"/>
+            <label class="label">
+
+                <span class="label-text-alt text-error">
+                    <ValidationMessage For="@(() => _command.MemoryLimit)"/>
+                </span>
+            </label>
+        </div>
+    </div>
+
+    <div class="flex justify-end">
+        <button class="btn btn-primary" type="submit">
+            Create
+        </button>
+    </div>
+
+</EditForm>
+
+@code {
+    private CreateProblemCommand _command = new ();
+    private FluentValidationValidator? _fluentValidationValidator;
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; } = default!;
+
+    [Inject]
+    public IMediator Mediator { get; set; } = default!;
+    [Inject]
+    public IToastService ToastService { get; set; } = default!;
+
+
+    private async Task SubmitFormAsync()
+    {
+        Console.WriteLine(JsonSerializer.Serialize(_command));
+        if (await _fluentValidationValidator!.ValidateAsync())
+        {
+            await Mediator.Send(_command);
+            ToastService.Success("Problem Created Successfully");
+            NavigationManager.NavigateTo("/Admin/Problems");
+        }
+    }
+
+}

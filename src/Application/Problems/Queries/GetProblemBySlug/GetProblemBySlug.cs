@@ -2,8 +2,7 @@
 using Code_Judge.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-using Code_Judge.Application.Common.Interfaces;
-using Code_Judge.Domain.Entities;
+
 using MediatR;
 
 namespace Code_Judge.Application.Problems.Queries.GetProblemBySlug;

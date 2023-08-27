@@ -4,4 +4,5 @@ public record CompileResult
 {
     public string FileName { get; } = Guid.NewGuid().ToString();
     public bool IsSuccess { get; set; }
+    public string? Error { get; set; }
 }

@@ -1,0 +1,41 @@
+﻿@inherits LayoutComponentBase
+<PageTitle>Code-Judge | Layout</PageTitle>
+
+<ToastProvider />
+<div class="h-screen flex flex-col ">
+    <header class="">
+        <NavMenu/>
+    </header>
+    <div class="drawer grow drawer-open">
+        <input id="sidebar" type="checkbox" class="drawer-toggle"/>
+        <div class="drawer-content p-4">
+            @Body
+            @* <label for="my-drawer-2" class="btn btn-primary drawer-button lg:hidden">Open drawer</label> *@
+
+        </div>
+        <div class="drawer-side">
+            <label for="sidebar" class="drawer-overlay"></label>
+            <ul class="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
+                <!-- Sidebar content here -->
+                <li>
+                    <a href="/Admin/Problems" class="active">
+                        Problems
+                    </a>
+                </li>
+
+                <li>
+                    <a href="/Admin/Contests">
+                        Contests
+                    </a>
+                </li>
+                <li>
+                    <a href="/Admin/Submissions">
+                        Submissions
+                    </a>
+                </li>
+            </ul>
+
+        </div>
+    </div>
+
+</div>

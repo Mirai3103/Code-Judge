@@ -1,0 +1,34 @@
+﻿@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+body {
+    font-family: "Inter", sans-serif;
+}
+
+#blazor-error-ui {
+    display: none;
+}
+
+@layer  components{
+    .editor-preview {
+        @apply prose bg-base-100;
+    }
+}
+.navbar .dropdown-content {
+    --tw-text-opacity: 1 !important;
+    color: hsl(var(--bc) / var(--tw-text-opacity)) !important;
+}
+.editor-preview {
+    --tw-bg-opacity: 1;
+    background-color: hsl(var(--b1) / var(--tw-bg-opacity));
+    --tw-text-opacity: 1;
+    color: hsl(var(--bc) / var(--tw-text-opacity));
+}
+.CodeMirror{
+    --tw-bg-opacity: 1;
+    background-color: hsl(var(--b1) / var(--tw-bg-opacity)) !important;
+    --tw-text-opacity: 1;
+    color: hsl(var(--bc) / var(--tw-text-opacity));
+}

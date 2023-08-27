@@ -1,0 +1,60 @@
+﻿<dialog id="@Id.ToString()" class="modal">
+    <form method="dialog" class="modal-box">
+        <h3 class="font-bold text-lg">
+            @Title
+        </h3>
+        <p class="py-3">
+            @Message
+        </p>
+        <div class="modal-action">
+            <div>
+                <button class="btn" @onclick="@OnClose">
+                    Cancel
+                </button>
+                <button class="btn btn-primary" @onclick="@OnConfirm">
+                    Yes
+                </button>
+            </div>
+        </div>
+    </form>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
+
+@code {
+    private Guid Id { get; } = Guid.NewGuid();
+
+    [Parameter]
+    public Action? OnYes { get; set; }
+
+    [Parameter]
+    public Action? OnNo { get; set; }
+
+    [Parameter]
+    public string Title { get; set; } = "Are you sure?";
+
+    [Parameter] 
+    public string Message { get; set; } = "Are you sure you want to do this?";
+
+    [Inject]
+    private IJSRuntime JsRuntime { get; set; } = null!;
+
+    private async Task OnClose()
+    {
+        await JsRuntime.InvokeVoidAsync("closeModal", Id.ToString());
+        OnNo?.Invoke();
+    }
+
+    private async Task OnConfirm()
+    {
+        await JsRuntime.InvokeVoidAsync("closeModal", Id.ToString());
+        OnYes?.Invoke();
+    }
+
+    public async Task Show()
+    {
+        await JsRuntime.InvokeVoidAsync("showModal", Id.ToString());
+    }
+
+}

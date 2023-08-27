@@ -1,0 +1,89 @@
+﻿@page "/Admin/Problems"
+@layout AdminLayout
+@using Code_Judge.Application.Common.Models
+@using Code_Judge.Application.Problems.Queries.GetProblemsWithPagination
+@using MediatR
+@inject IMediator Mediator
+@using BlazorWebUI.Extensions
+@using Code_Judge.Domain.Enums
+
+<div class="mb-6 flex justify-between">
+    <h1 class="text-2xl font-bold">
+        Quản lý problems
+    </h1>
+    <a class="btn btn-tertiary" href="/Admin/Problems/Create">
+        Tạo problem
+    </a>
+</div>
+<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+    <table class="table table-zebra">
+        <thead class="text-xl">
+        <tr>
+            <th scope="col" class="">
+            </th>
+            <th scope="col" class="">
+                Tiêu đề
+            </th>
+            <th scope="col" class="">
+                Độ khó
+            </th>
+            <th scope="col" class="">
+                Điểm
+            </th>
+            <th scope="col" class="">
+                Ngày tạo
+            </th>
+            <th></th>
+        </tr>
+        </thead>
+       @if (_problems == null)
+       {
+           <div> Loading</div>
+       }
+       else
+       {
+           var i = 1;
+           @foreach(var problem in _problems.Items)
+           {
+               <tr class="hover:bg-gray-50">
+                   <td class="">
+                       @i
+                   </td>
+                   <th scope="row" class=" font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                       @($"{problem.Id} - {problem.Name}")
+                   </th>
+                   <td class="">
+                       <span class="@problem.DifficultyLevel.GetComponentClassName()">
+                           @problem.DifficultyLevel.ToFriendlyString()
+                       </span>
+                   </td>
+                   <td class="">
+                       @problem.Points
+                   </td>
+                   <td class="">
+                       @problem.Created
+                   </td>
+                   <td class="">
+                       <a href="Admin/Problems/Edit/@problem.Id" class="text-indigo-600 hover:text-indigo-900">
+                           Sửa
+                       </a>
+                   </td>
+               </tr>
+               i++;
+           }
+       }
+    </table>
+</div>
+
+
+@code {
+    private PaginatedList<ProblemBriefDto>? _problems = null;
+    protected override async Task OnInitializedAsync()
+    {
+        _problems = await Mediator.Send(new GetProblemsWithPaginationQuery()
+        {
+            PageNumber = 1,
+            PageSize =  10
+        });
+    }
+}

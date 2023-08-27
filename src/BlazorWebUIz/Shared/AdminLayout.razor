@@ -1,0 +1,32 @@
+﻿@inherits LayoutComponentBase
+@inject IHttpContextAccessor HttpContextAccessor
+@inject NavigationManager NavigationManager
+<PageTitle>CodeJudge - Admin</PageTitle>
+<div class=" flex  gap-x-2">
+    <div class="w-[300px] p-4 bg-base-300  h-screen">
+        <ul className=" p-4  flex flex-col gap-y-2 menu menu-lg w-full  h-full text-base-content">
+            <li><a href="/Admin/Problems">
+                Problems
+            </a></li>
+            <li><a href="/Admin/Testcases">
+        Testcases                
+            </a></li>
+        </ul>
+      
+      </div>
+    <main class="grow w-full p-4">
+        @Body
+    </main>
+</div>
+@code {
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        var isAuthorized = HttpContextAccessor?.HttpContext?.User?.Identity?.IsAuthenticated??false;
+        if (!isAuthorized)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+
+}

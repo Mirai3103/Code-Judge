@@ -1,0 +1,38 @@
+﻿<Bar Breakpoint="Breakpoint.Desktop"
+     Background="Background.Light"
+     ThemeContrast="ThemeContrast.Light">
+    <BarBrand>
+        Code-Judge
+    </BarBrand>
+    <BarToggler />
+    <BarMenu Class="py-0">
+        <BarStart>
+            <BarItem >
+                <BarLink To="/Problems">
+                    Problems
+                </BarLink>
+            </BarItem>
+            <BarItem>
+                <BarLink To="/Contests">
+                    Contests
+                </BarLink>
+            </BarItem>
+            <BarItem>
+                <BarDropdown>
+                    <BarDropdownToggle>Dropdown</BarDropdownToggle>
+                    <BarDropdownMenu>
+                        <BarDropdownItem>Action</BarDropdownItem>
+                        <BarDropdownDivider />
+                        <BarDropdownItem>Another action</BarDropdownItem>
+                    </BarDropdownMenu>
+                </BarDropdown>
+            </BarItem>
+        </BarStart>
+        <BarEnd >
+            <LoginDisplay></LoginDisplay>
+        </BarEnd>
+    </BarMenu>
+</Bar>
+@code {
+    
+}

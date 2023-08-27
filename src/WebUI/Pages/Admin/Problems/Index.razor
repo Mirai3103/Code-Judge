@@ -1,0 +1,101 @@
+﻿@page "/Admin/Problems"
+@using MediatR
+@using Code_Judge.Application.Common.Models
+@using Code_Judge.Application.Problems.Queries.GetProblemsWithPagination
+@using Code_Judge.Domain.Enums
+@layout AdminLayout
+<div class="flex justify-between my-4">
+     <h1 class="text-2xl font-bold">
+        Problems Management
+    </h1>
+    <a class="btn btn-primary"href="/Admin/Problems/Create">
+        Create New Problem
+    </a>
+</div>
+<div class="overflow-x-auto">
+  <table class="table ">
+    <!-- head -->
+    <thead>
+      <tr>
+          <th>
+              Id
+          </th>
+          <th>
+              Title
+          </th>
+          <th>
+              Difficulty
+          </th>
+          <th>
+              Points
+          </th>
+          <th>
+              Created On
+          </th>
+          <th>
+              <i class="fa-solid fa-ellipsis"></i>
+          </th>
+      </tr>
+    </thead>
+    <tbody>
+     @if(Problems != null)
+     {
+         @foreach(var problem in Problems.Items)
+         {
+             <tr class="cursor-pointer hover:bg-base-200">
+                 <td>
+                     @problem.Id
+                 </td>
+                 <td>
+                     @problem.Name
+                 </td>
+                 <td>
+                     @problem.DifficultyLevel.ToFriendlyString()
+                 </td>
+                 <td>
+                     @problem.Points
+                 </td>
+                 <td>
+                     @problem.Created
+                 </td>
+                 <td>
+                     <div class="btn-group">
+                         <button class="btn btn-warning" @onclick="CreateEditClickHandler(problem.Id)">
+                             Edit
+                         </button>
+                         <button class="btn btn-error">
+                             Delete
+                         </button>
+                     </div>
+                 </td>
+             </tr>
+         }
+     }
+    </tbody>
+  </table>
+</div>
+
+@code {
+    [Inject] IMediator Mediator { get; set; } = null!;
+    [Inject] NavigationManager NavigationManager { get; set; } = null!;
+    private int CurrentPage { get; set; } = 1;
+    private PaginatedList<ProblemBriefDto>? Problems { get; set; } = null;
+    protected override async Task OnInitializedAsync()
+    {
+        var command = new GetProblemsWithPaginationQuery()
+        {
+            PageNumber = CurrentPage,
+            PageSize = 24
+        };
+        var result = await Mediator.Send(command);
+        Problems = result;
+    }
+    private Action CreateEditClickHandler(int id)
+    {
+        return () =>
+        {
+            NavigationManager.NavigateTo($"/Admin/Problems/{id}");
+        };
+    }
+    
+}

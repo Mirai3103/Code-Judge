@@ -1,0 +1,71 @@
+﻿@page "/Problems"
+@using Code_Judge.Application.Common.Models
+@using Code_Judge.Application.Problems.Queries.GetProblemsWithPagination
+@using Code_Judge.Domain.Enums
+@using MediatR
+@inject IMediator Mediator
+
+<Table Striped>
+    <TableHeader>
+        <TableRow>
+        <TableHeaderCell>#</TableHeaderCell>
+        <TableHeaderCell>
+            Title
+        </TableHeaderCell>
+        <TableHeaderCell>
+            Difficulty
+        </TableHeaderCell>
+        <TableHeaderCell>
+            Points
+        </TableHeaderCell>
+        <TableHeaderCell>
+            Created On
+        </TableHeaderCell>
+    </TableRow>
+        
+    </TableHeader>
+    
+        <TableBody>
+            
+            @if (_problems != null)
+            {
+                var i = 1;
+                @foreach (var problem in _problems.Items)
+                {
+                    <TableRow>
+                        <TableRowHeader>@i</TableRowHeader>
+                        <TableRowCell>  @($"{problem.Id} - {problem.Name}") </TableRowCell>
+                        <TableRowCell>@problem.DifficultyLevel.ToFriendlyString() </TableRowCell>
+                        <TableRowCell>@problem.Points</TableRowCell>
+                        <TableRowCell>@problem.Created</TableRowCell>
+                    </TableRow>
+                    i++;
+                }
+                @foreach (var problem in _problems.Items)
+                {
+                    <TableRow>
+                        <TableRowHeader>@i</TableRowHeader>
+                        <TableRowCell>  @($"{problem.Id} - {problem.Name}") </TableRowCell>
+                        <TableRowCell>@problem.DifficultyLevel.ToFriendlyString() </TableRowCell>
+                        <TableRowCell>@problem.Points</TableRowCell>
+                        <TableRowCell>@problem.Created</TableRowCell>
+                    </TableRow>
+                    i++;
+                }
+            }
+
+        </TableBody>
+
+</Table>
+
+@code {
+    private PaginatedList<ProblemBriefDto>? _problems = null;
+    protected override async Task OnInitializedAsync()
+    {
+        _problems = await Mediator.Send(new GetProblemsWithPaginationQuery()
+        {
+            PageNumber = 1,
+            PageSize =  10
+        });
+    }
+}
