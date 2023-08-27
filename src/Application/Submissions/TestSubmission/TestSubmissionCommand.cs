@@ -47,8 +47,8 @@ public class TestSubmissionCommandHandler : IRequestHandler<TestSubmissionComman
                 TimeElapsed = 0,
                 IsSuccess = false,
                 Error = "Compile Error",
-                ExitCode = -1,
-                TestCase = testCase
+                ExitCode = -1
+                
             });
         }
         var executeCodeTasks = listPublishTestCases.Select(testCase => Execute(executeCodeStrategy,compileResult.FileName,testCase,problem));
