@@ -5,10 +5,11 @@
 @using BlazorMonaco
 @using BlazorMonaco.Editor
 @using Code_Judge.Application.Common.Models
+@using Code_Judge.Application.Submissions.SubmissionRunningStream
 @using Code_Judge.Application.Submissions.TestSubmission
 @using Code_Judge.Application.TestCases.Queries.GetTestCases
 @using Code_Judge.Domain.Enums
-@using Microsoft.IdentityModel.Tokens
+@using Code_Judge.WebUi.Services
 @if (Problem is not null)
 {
     <div class="flex justify-evenly h-[calc(100vh-70px)]  w-full ">
@@ -47,88 +48,59 @@
                                 Light
                             </option>
                         </InputSelect>
+                        <button class="btn btn-ghost btn-sm" @onclick="ClearEditor">
+                            Clear
+                        </button>
                     </div>
                 </div>
                 <StandaloneCodeEditor @ref="StandaloneCodeEditorRef" CssClass="h-full grow" Id="my-editor-instance-id" ConstructionOptions="EditorConstructionOptions"/>
                 <div class="flex justify-end gap-x-2">
-                    <button class="btn-ghost btn btn-secondary" @onclick="Run">
+                    <button class="btn-ghost btn btn-secondary" @onclick="Run" disabled="@(IsRunningTest || @IsSubmitting)">
                         Run
                     </button>
-                    <button class="btn-secondary btn">
+                    <button class="btn-secondary btn" @onclick="Submit" disabled="@(IsRunningTest || @IsSubmitting)">
                         Submit
                     </button>
                 </div>
             </div>
         </div>
     </div>
-
-    <dialog id="@_runModalId.ToString()" class="modal">
-        <form method="dialog" class="modal-box p-4 rounded-2xl">
-            <h3 class="font-bold text-lg">
-                Running...
-            </h3>
-            @if (Results.Count() > 0)
+    <Modal @ref="RunTestModalRef">
+        <h3 class="font-bold text-lg">
+            Running...
+        </h3>
+        @if (Results.Any())
+        {
+            foreach (var result in Results)
             {
-                foreach (var result in Results)
-                {
-                    <div class="collapse my-2 collapse-arrow bg-base-200">
-                        <input type="radio" name="testrunning"/>
-                        <div class="collapse-title text-xl font-medium">
-                            @($"Test Case #{result.TestCase!.Id} ")
-                            @if (result.Status == SubmissionStatus.Running)
-                            {
-                                <span class="loading ml-2 loading-spinner loading-sm"></span>
-                            }
-                            else
-                            {
-                                <span class="@(result.Status==SubmissionStatus.Accepted ? "text-green-500" : "text-red-500")">
-                                  - @result.Status.ToFriendlyString()
-                                </span>
-                            }
-                        </div>
-                        <div class="collapse-content prose">
-                            <h4>
-                                Input
-                            </h4>
-                            <pre class="overflow-x-auto">
-                                @result.TestCase.Input
-                            </pre>
-
-                            <h4>
-                                Expected Output
-                            </h4>
-                            <pre class="overflow-x-auto">
-                                @result.TestCase.Output
-                            </pre>
-                            <h4>
-                                Actual Output
-                            </h4>
-                            <pre class="overflow-x-auto">
-                                    @if (result.Status == SubmissionStatus.Running)
-                                    {
-                                        <span className="loading loading-dots loading-xs"></span>
-                                    }
-                                    else
-                                    {
-                                        @result.Output
-                                    }
-                            </pre>
-                        </div>
-                    </div>
-                }
+                <TestCaseResultShow Result="result"/>
             }
-            <div class="modal-action">
-                <button class="btn">Close</button>
-            </div>
-        </form>
-        <form method="dialog" class="modal-backdrop">
-            <button>close</button>
-        </form>
-    </dialog>
+        }
+        <div class="modal-action">
+            <button class="btn">Close</button>
+        </div>
+    </Modal>
+    <Modal @ref="SubmitModalRef">
+        <h3 class="font-bold text-lg">
+            Submitting...
+        </h3>
+        @if (ResultsStream is not null)
+        {
+             foreach (var result in ResultsStream)
+            {
+                <TestCaseResultShow Result="result"/>
+            }
+        }
+        <div class="modal-action">
+            <button class="btn">Close</button>
+        </div>
+    </Modal>
 }
 
 @code {
-    private Guid _runModalId = Guid.NewGuid();
+    private Modal RunTestModalRef { get; set; } = default!;
+    private Modal SubmitModalRef { get; set; } = default!;
+    private ICollection<ExecuteCodeResult> ResultsStream { get; set; } = new List<ExecuteCodeResult>();
 
     [Parameter]
     public string? Slug { get; set; }
@@ -144,9 +116,14 @@
     [Inject]
     public IJSRuntime _jsRuntime { get; set; } = default!;
 
-    private IEnumerable<ExecuteCodeResult> Results { get; set; } = new List<ExecuteCodeResult>();
-    private IEnumerable<TestCase> TestCases { get; set; } = null!;
+    private ICollection<ExecuteCodeResult> Results { get; set; } = new List<ExecuteCodeResult>();
+    private ICollection<TestCase> TestCases { get; set; } = null!;
     private ProgramingLanguage _language = ProgramingLanguage.Cpp;
+    private bool IsSubmitting { get; set; } = false;
+    private bool IsRunningTest { get; set; } = false;
+
+    [Inject]
+    private IToastService ToastService { get; set; } = default!;
 
     private ProgramingLanguage Language
     {
@@ -159,17 +136,17 @@
     }
 
     private string _theme = "vs-dark";
+
     private string Theme
     {
         get => _theme;
         set
         {
-               this.OnThemeChange(value).GetAwaiter();
+            this.OnThemeChange(value).GetAwaiter();
             _theme = value;
-            
         }
-    } 
-    
+    }
+
 
     private StandaloneCodeEditor StandaloneCodeEditorRef { get; set; } = default!;
 
@@ -194,7 +171,7 @@
             Theme = "vs-dark"
         };
     }
-    
+
     protected override async Task OnParametersSetAsync()
     {
         if (Slug is null) _navigationManager.NavigateTo("/");
@@ -204,28 +181,73 @@
         {
             _navigationManager.NavigateTo("/");
         }
-        var testCasesCommand = new GetPublishTestCasesQuery(Problem!.Id);
+        var testCasesCommand = new GetTestCasesQuery(Problem!.Id);
         TestCases = await _mediator.Send(testCasesCommand);
-      
     }
 
     private async Task Run()
     {
-        Results = TestCases.Select(t => new ExecuteCodeResult() { Status = SubmissionStatus.Running, TestCase = t });
+        if (!await Validate()) return;
+        IsRunningTest = true;
+        Results = TestCases.Where(t=>!t.IsHidden).Select(t => new ExecuteCodeResult() { Status = SubmissionStatus.Running, TestCase = t }).ToList();
         var testSubmission = new TestSubmissionCommand()
         {
             Language = Language,
             Code = await StandaloneCodeEditorRef.GetValue(),
             ProblemId = Problem!.Id
         };
-        var results =  _mediator.Send(testSubmission);
-        await _jsRuntime.InvokeVoidAsync("showModal", _runModalId.ToString());
+        var results = _mediator.Send(testSubmission);
+
+        RunTestModalRef.Show();
         Results = await results;
+        IsRunningTest = false;
     }
 
-    private async Task Close()
+    private async Task<bool> Validate()
     {
-        await _jsRuntime.InvokeVoidAsync("closeModal", _runModalId.ToString());
+        var code = await StandaloneCodeEditorRef.GetValue();
+        if (!string.IsNullOrWhiteSpace(code)) return true;
+        ToastService.Error("Code is required");
+        return false;
+    }
+
+    private async Task Submit()
+    {
+        if (!await Validate()) return;
+        IsSubmitting = true;
+        
+        ResultsStream = TestCases.Select(t => new ExecuteCodeResult() { Status = SubmissionStatus.Running, TestCase = t }).ToList();
+        StateHasChanged();
+        SubmitModalRef.Show();
+        await Task.Delay(100);
+
+        var testSubmission = new SubmissionRunningStream()
+        {
+            Language = Language,
+            Code = await StandaloneCodeEditorRef.GetValue(),
+            ProblemId = Problem!.Id
+        };
+        await foreach (var result in  _mediator.CreateStream(testSubmission))
+        {
+            var exist = ResultsStream.FirstOrDefault(r => r.TestCase!.Id == result.TestCase!.Id);
+            if (exist is null) continue;
+            exist.Status = result.Status;
+            exist.Output = result.Output;
+            exist.TimeElapsed = result.TimeElapsed;
+            exist.MemoryUsage = result.MemoryUsage;
+            exist.Output = result.Output;
+            exist.IsSuccess = result.IsSuccess;
+            exist.Error = result.Error;
+            StateHasChanged();
+        }
+        IsSubmitting = false;
+       
+    }
+
+
+    private async Task ClearEditor()
+    {
+        await StandaloneCodeEditorRef.SetValue("");
     }
 
 }

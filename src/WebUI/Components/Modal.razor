@@ -1,0 +1,23 @@
+﻿@inherits ComponentBase
+
+<dialog id="@_modalId.ToString()" class="modal">
+        <form method="dialog" class="modal-box p-4 rounded-2xl">
+            @ChildContent
+        </form>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private readonly Guid  _modalId = Guid.NewGuid();
+    [Inject] private IJSRuntime _jsRuntime { get; set; }
+    public async void Show()
+    {
+     await   _jsRuntime.InvokeVoidAsync("showModal", _modalId.ToString());
+    }
+    public async void Close()
+    {
+        await _jsRuntime.InvokeVoidAsync("closeModal", _modalId.ToString());
+    }
+}

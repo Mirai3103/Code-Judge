@@ -2,7 +2,7 @@
 
 public class Result
 {
-    internal Result(bool succeeded, IEnumerable<string> errors)
+    internal Result(bool succeeded, ICollection<string> errors)
     {
         Succeeded = succeeded;
         Errors = errors.ToArray();
@@ -17,7 +17,7 @@ public class Result
         return new Result(true, Array.Empty<string>());
     }
 
-    public static Result Failure(IEnumerable<string> errors)
+    public static Result Failure(ICollection<string> errors)
     {
         return new Result(false, errors);
     }

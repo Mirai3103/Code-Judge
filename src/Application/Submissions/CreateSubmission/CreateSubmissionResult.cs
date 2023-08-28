@@ -5,6 +5,6 @@ namespace Code_Judge.Application.Submissions.CreateSubmission;
 
 public class CreateSubmissionResult
 {
-   public IEnumerable<ExecuteCodeResult> ExecuteCodeResults { get; set; } = new List<ExecuteCodeResult>();
+   public ICollection<ExecuteCodeResult> ExecuteCodeResults { get; set; } = new List<ExecuteCodeResult>();
     public Submission Submission { get; set; } = null!;
 }

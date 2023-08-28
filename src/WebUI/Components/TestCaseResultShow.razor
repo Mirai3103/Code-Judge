@@ -1,0 +1,65 @@
+﻿@using Code_Judge.Application.Common.Models
+@using Code_Judge.Domain.Enums
+@inherits ComponentBase
+
+<div class="collapse my-2 collapse-arrow bg-base-200">
+    <input type="checkbox" name="testrunning"/>
+    <div class="collapse-title text-xl font-medium">
+        @($"Test Case #{Result.TestCase!.Id} ")
+        @if (Result.Status == SubmissionStatus.Running)
+        {
+            <span class="loading ml-2 loading-spinner loading-sm"></span>
+        }
+        else
+        {
+            <span class="@(Result.Status == SubmissionStatus.Accepted ? "text-green-500" : "text-red-500")">
+                - @Result.Status.ToFriendlyString()
+            </span>
+        }
+    </div>
+    @if (Result.TestCase.IsHidden)
+    {
+        <div class="collapse-content prose">
+            <p class="text-gray-500">This test case is hidden</p>
+        </div>
+    }
+    else
+    {
+        <div class="collapse-content prose">
+            <h4>
+                Input
+            </h4>
+            <pre class="overflow-x-auto">
+                                @Result.TestCase.Input
+                            </pre>
+
+            <h4>
+                Expected Output
+            </h4>
+            <pre class="overflow-x-auto">
+                                @Result.TestCase.Output
+                            </pre>
+            <h4>
+                Actual Output
+            </h4>
+            <pre class="overflow-x-auto">
+            @if (Result.Status == SubmissionStatus.Running)
+            {
+                <span className="loading loading-dots loading-xs"></span>
+            }
+            else
+            {
+                @Result.Output
+            }
+            </pre>
+        </div>
+    }
+</div>
+
+
+@code {
+
+    [Parameter]
+    public ExecuteCodeResult Result { get; set; } = null!;
+
+}

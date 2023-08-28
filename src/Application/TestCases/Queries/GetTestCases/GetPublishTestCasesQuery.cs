@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Code_Judge.Application.TestCases.Queries.GetTestCases;
 
-public record GetPublishTestCasesQuery(int ProblemId) : IRequest<IEnumerable<TestCase>>;
+public record GetPublishTestCasesQuery(int ProblemId) : IRequest<ICollection<TestCase>>;
 
-public class GetPublishTestCasesQueryHandler : IRequestHandler<GetPublishTestCasesQuery, IEnumerable<TestCase>>
+public class GetPublishTestCasesQueryHandler : IRequestHandler<GetPublishTestCasesQuery, ICollection<TestCase>>
 {
     private readonly IApplicationDbContext _context;
 
@@ -16,7 +16,7 @@ public class GetPublishTestCasesQueryHandler : IRequestHandler<GetPublishTestCas
         _context = context;
     }
 
-    public async Task<IEnumerable<TestCase>> Handle(GetPublishTestCasesQuery request, CancellationToken cancellationToken)
+    public async Task<ICollection<TestCase>> Handle(GetPublishTestCasesQuery request, CancellationToken cancellationToken)
     {
         var entity = await _context.TestCases.Where(x => x.ProblemId == request.ProblemId && x.IsHidden == false).ToListAsync(cancellationToken);
         return entity;

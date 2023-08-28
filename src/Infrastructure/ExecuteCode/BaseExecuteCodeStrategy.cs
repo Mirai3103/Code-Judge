@@ -36,7 +36,7 @@ public abstract class BaseExecuteCodeStrategy : IExecuteCodeStrategy
         var result = new ExecuteCodeResult();
         var maxMemoryUsageInBytes = (long)(memoryLimit * 1024 * 1024);
         process.Start();
-        await Task.Delay(10);
+        await Task.Delay(500, cancellationToken);
         await process.StandardInput.WriteLineAsync(input);
         // var memoryUsageTask = WatchMemory(process, maxMemoryUsageInBytes);
         var output = process.StandardOutput.ReadToEndAsync();

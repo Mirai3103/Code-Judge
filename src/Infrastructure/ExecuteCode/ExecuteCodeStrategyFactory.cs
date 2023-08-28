@@ -16,6 +16,7 @@ public class ExecuteCodeStrategyFactory: IExecuteCodeStrategyFactory
         return programingLanguage switch
         {
             ProgramingLanguage.Cpp => _serviceProvider.GetRequiredService<ExecuteCppStrategy>(),
+            ProgramingLanguage.Python => _serviceProvider.GetRequiredService<ExecutePythonStrategy>(),
             _ => throw new ArgumentOutOfRangeException(nameof(programingLanguage), programingLanguage, null)
         };
     }

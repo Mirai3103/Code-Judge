@@ -83,7 +83,7 @@
     @code {
     private YesNoDialog YesNoDialogRef { get; set; } = null!;
     private Problem? _problem ;
-    private IEnumerable<TestCase> _testCases = null!;
+    private ICollection<TestCase> _testCases = null!;
     private readonly Guid _createModalId = Guid.NewGuid();
     
     [Inject]
@@ -127,8 +127,8 @@
         await JsRuntime.InvokeVoidAsync("showModal", _createModalId.ToString());
     }
    private  void OnTestCaseCreated(TestCase testCase)
-    {
-        _testCases = _testCases.Append(testCase);
+   {
+       _testCases = _testCases.Prepend(testCase).ToList();
         StateHasChanged();
     }
     private CreateTestCaseModal CreateTestCaseModalRef { get; set; } = null!;
@@ -144,7 +144,7 @@
                 var deleteTestCaseCommand = new DeleteTestCaseCommand(testCase.Id);
                 Mediator.Send(deleteTestCaseCommand);
                 ToastService.Success("Test Case Deleted");
-                _testCases = _testCases.Where(x => x.Id != testCase.Id);
+                _testCases = _testCases.Where(x => x.Id != testCase.Id).ToList();
                 StateHasChanged();
             };
             YesNoDialogRef.OnNo = () =>

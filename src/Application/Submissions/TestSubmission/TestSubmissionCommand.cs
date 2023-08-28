@@ -10,14 +10,14 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Code_Judge.Application.Submissions.TestSubmission;
 
-public record TestSubmissionCommand:IRequest<IEnumerable<ExecuteCodeResult>>
+public record TestSubmissionCommand:IRequest<ICollection<ExecuteCodeResult>>
 {
     public int ProblemId { get; init; }
     public string Code { get; init; } = null!;
     public ProgramingLanguage Language { get; init; }
 }
 
-public class TestSubmissionCommandHandler : IRequestHandler<TestSubmissionCommand, IEnumerable<ExecuteCodeResult>>
+public class TestSubmissionCommandHandler : IRequestHandler<TestSubmissionCommand, ICollection<ExecuteCodeResult>>
 {
     private readonly IExecuteCodeStrategyFactory _executeCodeStrategyFactory;
     private readonly IMediator _mediator;
@@ -28,7 +28,7 @@ public class TestSubmissionCommandHandler : IRequestHandler<TestSubmissionComman
         _mediator = mediator;
     }
 
-    public async Task<IEnumerable<ExecuteCodeResult>> Handle(TestSubmissionCommand request, CancellationToken cancellationToken)
+    public async Task<ICollection<ExecuteCodeResult>> Handle(TestSubmissionCommand request, CancellationToken cancellationToken)
     {
         var executeCodeStrategy = _executeCodeStrategyFactory.GetExecuteCodeStrategy(request.Language);
         var listPublishTestCases = await _mediator.Send(new GetPublishTestCasesQuery(request.ProblemId),cancellationToken);
@@ -47,9 +47,9 @@ public class TestSubmissionCommandHandler : IRequestHandler<TestSubmissionComman
                 TimeElapsed = 0,
                 IsSuccess = false,
                 Error = "Compile Error",
-                ExitCode = -1
-                
-            });
+                ExitCode = -1,
+                TestCase = testCase
+            }).ToList();
         }
         var executeCodeTasks = listPublishTestCases.Select(testCase => Execute(executeCodeStrategy,compileResult.FileName,testCase,problem));
    

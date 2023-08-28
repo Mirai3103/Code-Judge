@@ -2,9 +2,9 @@
 
 namespace Code_Judge.Application.WeatherForecasts.Queries.GetWeatherForecasts;
 
-public record GetWeatherForecastsQuery : IRequest<IEnumerable<WeatherForecast>>;
+public record GetWeatherForecastsQuery : IRequest<ICollection<WeatherForecast>>;
 
-public class GetWeatherForecastsQueryHandler : IRequestHandler<GetWeatherForecastsQuery, IEnumerable<WeatherForecast>>
+public class GetWeatherForecastsQueryHandler : IRequestHandler<GetWeatherForecastsQuery, ICollection<WeatherForecast>>
 {
     private static readonly string[] Summaries = new[]
     {
@@ -12,7 +12,7 @@ public class GetWeatherForecastsQueryHandler : IRequestHandler<GetWeatherForecas
     };
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-    public async Task<IEnumerable<WeatherForecast>> Handle(GetWeatherForecastsQuery request, CancellationToken cancellationToken)
+    public async Task<ICollection<WeatherForecast>> Handle(GetWeatherForecastsQuery request, CancellationToken cancellationToken)
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         var rng = new Random();
@@ -22,6 +22,6 @@ public class GetWeatherForecastsQueryHandler : IRequestHandler<GetWeatherForecas
             Date = DateTime.Now.AddDays(index),
             TemperatureC = rng.Next(-20, 55),
             Summary = Summaries[rng.Next(Summaries.Length)]
-        });
+        }).ToList();
     }
 }

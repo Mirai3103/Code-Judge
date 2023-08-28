@@ -13,8 +13,8 @@ public class Problem:BaseAuditableEntity
     public int Points { get; set; }
     public DifficultyLevel DifficultyLevel { get; set; }
     public string? Hint { get; set; }
-    public virtual IEnumerable<TestCase> TestCases { get; set; } = new HashSet<TestCase>();
-    public virtual IEnumerable<Submission> Submissions { get; set; } = new HashSet<Submission>();
+    public virtual ICollection<TestCase> TestCases { get; set; } = new HashSet<TestCase>();
+    public virtual ICollection<Submission> Submissions { get; set; } = new HashSet<Submission>();
     public Editorial? Editorial { get; set; }
     public int? EditorialId { get; set; }
     public int TimeLimit { get; set; } // in milliseconds

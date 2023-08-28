@@ -37,7 +37,6 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\Application\Application.csproj" />
         <ProjectReference Include="..\..\src\Infrastructure\Infrastructure.csproj" />
-        <ProjectReference Include="..\..\src\WebApi\WebApi.csproj" />
         <ProjectReference Include="..\..\src\WebUi\WebUi.csproj" />
 
     </ItemGroup>

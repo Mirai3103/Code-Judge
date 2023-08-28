@@ -8,7 +8,7 @@ namespace Code_Judge.Infrastructure.Files;
 
 public class CsvFileBuilder : ICsvFileBuilder
 {
-    public byte[] BuildTodoItemsFile(IEnumerable<TodoItemRecord> records)
+    public byte[] BuildTodoItemsFile(ICollection<TodoItemRecord> records)
     {
         using var memoryStream = new MemoryStream();
         using (var streamWriter = new StreamWriter(memoryStream))
