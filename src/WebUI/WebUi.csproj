@@ -270,10 +270,16 @@
     <_ContentIncludedByDefault Remove="wwwroot\lib\monaco-editor\min\vs\language\typescript\tsWorker.min.js" />
     <_ContentIncludedByDefault Remove="wwwroot\lib\monaco-editor\min\vs\loader.js" />
     <_ContentIncludedByDefault Remove="wwwroot\lib\monaco-editor\min\vs\loader.min.js" />
+    <_ContentIncludedByDefault Remove="Pages\Admin\Problems\TestCases\CreateTestCaseModal.razor" />
+    <_ContentIncludedByDefault Remove="Pages\Admin\Problems\TestCases\Index.razor" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="wwwroot\css\site.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <AdditionalFiles Include="Pages\Admin\Problems\Edit\TestCases\CreateTestCaseModal.razor" />
+    <AdditionalFiles Include="Pages\Admin\Problems\Edit\TestCases\Index.razor" />
   </ItemGroup>
 </Project>

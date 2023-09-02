@@ -9,10 +9,10 @@ namespace Code_Judge.Application.Problems.Commands.CreateProblem;
 public record CreateProblemCommand : IRequest<int>
 {
     public int? ContestId { get; set; }
-    public bool IsPublic { get; set; }
+    public bool IsPublic { get; set; } = true;
     public string Name { get; set; } = null!;
     public string Description { get; set; } = null!;
-    public int Points { get; set; }
+    public int Points { get; set; } =1;
     public DifficultyLevel DifficultyLevel { get; set; }
     public string? Hint { get; set; }
     public int TimeLimit { get; set; } // in milliseconds

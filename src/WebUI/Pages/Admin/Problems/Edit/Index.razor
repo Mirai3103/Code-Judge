@@ -1,0 +1,212 @@
+﻿@page "/Admin/Problems/Edit/{Id:int}"
+@using Code_Judge.Domain.Entities
+@using Code_Judge.Application.Problems.Queries.GetProblemById
+@using Code_Judge.WebUi.Services
+@using MediatR
+@using Code_Judge.Application.Problems.Commands.EditProblem
+@using Blazored.FluentValidation
+@using Code_Judge.Domain.Enums
+<div class="max-w-[1080px] mx-auto mt-4">
+    <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-semibold">
+            @_problem?.Name
+        </h2>
+        <a href="/Admin/Problems" class="btn btn-secondary">
+            Back
+        </a>
+    </div>
+    <div class="flex flex-col px-2 mt-4">
+        <div class="tabs">
+            <a class="tab tab-lg tab-lifted tab-active">
+
+                Details
+            </a>
+            <a class="tab tab-lg tab-lifted" href="/Admin/Problems/Edit/@_problem?.Id/TestCases">
+                Test Cases
+            </a>
+            <a class="grow tab-lg tab tab-lifted cursor-default">
+
+            </a>
+            @* <a class="tab tab-lifted">Tab 3</a> *@
+        </div>
+        <div>
+            <EditForm Model="@_command" class="flex flex-col gap-y-2 m-4 ">
+                <FluentValidationValidator @ref="_fluentValidationValidator"/>
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text">
+                            Name
+
+                            <sup class="text-red-500">*</sup>
+                        </span>
+                    </label>
+                    <input type="text" class="input input-bordered w-full " @bind="_command.Name" placeholder="Name"/>
+                    <label class="label">
+
+                        <span class="label-text-alt text-error">
+                            <ValidationMessage For="@(() => _command.Name)"/>
+                        </span>
+                    </label>
+                </div>
+                <div class="form-control">
+                    <label class="label cursor-pointer justify-start gap-x-2">
+                        <InputCheckbox @bind-Value="_command.IsPublic" class=" checkbox"/>
+
+                        <span class="label-text">
+                            Is Public ?
+                        </span>
+
+                    </label>
+                </div>
+
+                <div class="form-control w-full ">
+                    <label class="label">
+                        <span class="label-text">
+                            Difficulty Level
+                            <sup class="text-red-500">
+                                *
+                            </sup>
+                        </span>
+                    </label>
+                    <select class="select select-bordered" @bind="_command.DifficultyLevel">
+                        @foreach (DifficultyLevel level in Enum.GetValues(typeof(DifficultyLevel)))
+                        {
+                            <option value="@level">@level.ToFriendlyString()</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">
+                            Points
+                            <sup class="text-red-500">
+                                *
+                            </sup>
+                        </span>
+                    </label>
+                    <InputNumber class="input input-bordered w-full " @bind-Value="_command.Points" placeholder="Points"/>
+                    <label class="label">
+
+                        <span class="label-text-alt text-error">
+                            <ValidationMessage For="@(() => _command.Points)"/>
+                        </span>
+                    </label>
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">
+                            Description
+                            <sup class="text-red-500">
+                                *
+                            </sup>
+                        </span>
+                    </label>
+                    <MarkdownEditor @bind-Value="_command.Description"/>
+                    <label class="label">
+                        <span class="label-text-alt text-error">
+                            <ValidationMessage For="@(() => _command.Description)"/>
+                        </span>
+                    </label>
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">
+                            Hint
+                        </span>
+                    </label>
+                    <textarea class="textarea textarea-bordered h-16" placeholder="Hint" @bind="_command.Hint"></textarea>
+                </div>
+                <div class="grid-cols-2 grid gap-x-2">
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">
+                                Time Limit (ms)
+                                <sup class="text-red-500">
+                                    *
+                                </sup>
+                            </span>
+                        </label>
+                        <InputNumber class="input input-bordered w-full " @bind-Value="_command.TimeLimit" placeholder="Time Limit"/>
+                        <label class="label">
+
+                            <span class="label-text-alt text-error">
+                                <ValidationMessage For="@(() => _command.TimeLimit)"/>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">
+                                Memory Limit (MB)
+                                <sup class="text-red-500">
+                                    *
+                                </sup>
+                            </span>
+                        </label>
+                        <InputNumber class="input input-bordered w-full " @bind-Value="_command.MemoryLimit" placeholder="Memory Limit"/>
+                        <label class="label">
+
+                            <span class="label-text-alt text-error">
+                                <ValidationMessage For="@(() => _command.MemoryLimit)"/>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class=" bg-base-200 border-t-base-300 rounded-t  fixed   w-screen bottom-0 right-0 p-4">
+                    <div class="flex justify-end max-w-[1180px] mx-auto">
+                        <button class="btn btn-primary" type="submit">
+                            Save changes
+                        </button>
+                    </div>
+                </div>
+
+            </EditForm>
+        </div>
+    </div>
+    <div class="h-24"></div>
+</div>
+
+@code {
+    private Problem? _problem;
+
+    [Parameter]
+    public int Id { get; set; }
+
+    [Inject]
+    private IMediator Mediator { get; set; } = null!;
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = null!;
+
+    [Inject]
+    private IToastService ToastService { get; set; } = null!;
+
+    private EditProblemCommand _command = new EditProblemCommand(0);
+    private FluentValidationValidator _fluentValidationValidator = null!;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var command = new GetProblemByIdQuery(Id);
+        _problem = await Mediator.Send(command);
+        if (_problem == null)
+        {
+            NavigationManager.NavigateTo("/Admin/Problems");
+            ToastService.Error("Problem not found");
+            return;
+        }
+        _command = new EditProblemCommand(_problem.Id)
+        {
+            Description = _problem.Description,
+            DifficultyLevel = _problem.DifficultyLevel,
+            Hint = _problem.Hint,
+            IsPublic = _problem.IsPublic,
+            MemoryLimit = _problem.MemoryLimit,
+            Name = _problem.Name,
+            Points = _problem.Points,
+            TimeLimit = _problem.TimeLimit
+        };
+    }
+
+
+}

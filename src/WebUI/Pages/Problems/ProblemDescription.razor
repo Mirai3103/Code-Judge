@@ -1,0 +1,35 @@
+﻿@inherits ComponentBase;
+@inject NavigationManager NavigationManager
+@using Code_Judge.Domain.Entities
+    <div class="min-w-[46vw] gap-y-1 bg-base-100 grow flex flex-col h-[calc(100vh-70px)] py-6 px-2">
+            <div class="tabs">
+                <a class="tab tab-lifted @GetClassForTab($"Problems/{Problem.Slug}")"
+                   href="/Problems/@(Problem.Slug)">
+                    Problem Details
+                </a>
+
+                <a class="tab tab-lifted">
+                    Editorial
+                </a>
+                <a class="tab tab-lifted">
+                    Comments
+                </a>
+                <a class="tab tab-lifted @GetClassForTab($"Problems/{Problem.Slug}/MySubmissions")"
+                   href="/Problems/@(Problem.Slug)/MySubmissions">
+                   My Submissions
+                </a>
+            </div>
+            <div class="prose  px-2 max-h-full w-full min-w-full overflow-y-auto ">
+                <h2>@($"{Problem.Id} - {Problem.Name}")</h2>
+                @((MarkupString)Markdig.Markdown.ToHtml(Problem.Description))
+            </div>
+        </div>
+
+@code {
+    [Parameter] public Problem Problem { get; set; } =null!;
+    private string GetClassForTab(string href)
+    {
+        var currentPath = NavigationManager.Uri;
+        return currentPath.EndsWith(href) ? "tab-active" : "";
+    }
+}

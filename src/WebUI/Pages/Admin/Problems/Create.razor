@@ -6,9 +6,25 @@
 @using Code_Judge.WebUi.Services
 @using MediatR
 @layout AdminLayout
-<h1 class="text-2xl font-semibold my-2">
-    Create new Problem
-</h1>
+<div class="flex justify-between items-center">
+    <h1 class="text-2xl font-semibold my-2">
+        Create new Problem
+    </h1>
+
+    <div>
+        <label class="btn btn-primary cursor-pointer" for="file">
+            Input from JSON file
+            <InputFile id="file" class=" hidden" placeholder="Create from JSON file" OnChange="@OnFileChange">
+            </InputFile>
+        </label>
+        <label class="btn btn-primary cursor-pointer" for="file2">
+            Import from JSON file
+            <InputFile id="file2" class=" hidden" placeholder="Import from JSON file" OnChange="@OnImportFileChange">
+            </InputFile>
+        </label>
+    </div>
+
+</div>
 <EditForm Model="@_command" OnSubmit="@SubmitFormAsync" class="flex flex-col gap-y-2 m-4 ">
     <FluentValidationValidator @ref="_fluentValidationValidator"/>
     <div class="form-control w-full">
@@ -58,9 +74,12 @@
         <label class="label">
             <span class="label-text">
                 Points
+                <sup class="text-red-500">
+                    *
+                </sup>
             </span>
         </label>
-        <InputNumber class="input input-bordered w-full "  @bind-Value="_command.Points" placeholder="Points"/>
+        <InputNumber class="input input-bordered w-full " @bind-Value="_command.Points" placeholder="Points"/>
         <label class="label">
 
             <span class="label-text-alt text-error">
@@ -71,7 +90,10 @@
     <div class="form-control">
         <label class="label">
             <span class="label-text">
-                Points
+                Description
+                <sup class="text-red-500">
+                    *
+                </sup>
             </span>
         </label>
         <MarkdownEditor @bind-Value="_command.Description"/>
@@ -99,7 +121,7 @@
                     </sup>
                 </span>
             </label>
-            <InputNumber class="input input-bordered w-full "  @bind-Value="_command.TimeLimit" placeholder="Time Limit"/>
+            <InputNumber class="input input-bordered w-full " @bind-Value="_command.TimeLimit" placeholder="Time Limit"/>
             <label class="label">
 
                 <span class="label-text-alt text-error">
@@ -135,7 +157,7 @@
 </EditForm>
 
 @code {
-    private CreateProblemCommand _command = new ();
+    private CreateProblemCommand _command = new();
     private FluentValidationValidator? _fluentValidationValidator;
 
     [Inject]
@@ -143,13 +165,13 @@
 
     [Inject]
     public IMediator Mediator { get; set; } = default!;
+
     [Inject]
     public IToastService ToastService { get; set; } = default!;
 
 
     private async Task SubmitFormAsync()
     {
-        Console.WriteLine(JsonSerializer.Serialize(_command));
         if (await _fluentValidationValidator!.ValidateAsync())
         {
             await Mediator.Send(_command);
@@ -158,4 +180,35 @@
         }
     }
 
+    private async Task OnFileChange(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        var readStream = file.OpenReadStream();
+        var content = await new StreamReader(readStream).ReadToEndAsync();
+        var problem = JsonSerializer.Deserialize<CreateProblemCommand>(content, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+        if (problem is not null)
+        {
+            _command = problem;
+            StateHasChanged();
+        }
+        else
+        {
+            ToastService.Error("Invalid JSON file");
+        }
+    }
+    
+  
+    private async Task OnImportFileChange(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        var readStream = file.OpenReadStream();
+        var content = await new StreamReader(readStream).ReadToEndAsync();
+        var command = new CreateProblemFromJsonCommand(content);
+        await Mediator.Send(command);
+        ToastService.Success("Problem Created Successfully");
+        NavigationManager.NavigateTo("/Admin/Problems");    
+    }
 }

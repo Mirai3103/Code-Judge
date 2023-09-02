@@ -7,7 +7,7 @@ using Code_Judge.Domain.Entities;
 using Code_Judge.Domain.Enums;
 using MediatR;
 
-namespace Code_Judge.Application.Submissions.CreateSubmission;
+namespace Code_Judge.Application.Submissions.Commands.CreateSubmission;
 
 public record CreateSubmissionCommand:IRequest<CreateSubmissionResult>
 {

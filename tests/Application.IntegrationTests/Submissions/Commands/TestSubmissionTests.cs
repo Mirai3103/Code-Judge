@@ -1,5 +1,5 @@
 ﻿using Code_Judge.Application.Problems.Queries.GetProblemBySlug;
-using Code_Judge.Application.Submissions.TestSubmission;
+using Code_Judge.Application.Submissions.Commands.TestSubmission;
 using Code_Judge.Domain.Enums;
 using NUnit.Framework;
 

@@ -5,19 +5,20 @@
 @using BlazorMonaco
 @using BlazorMonaco.Editor
 @using Code_Judge.Application.Common.Models
-@using Code_Judge.Application.Submissions.SubmissionRunningStream
-@using Code_Judge.Application.Submissions.TestSubmission
+@using Code_Judge.Application.Submissions.Commands.SubmissionRunningStream
+@using Code_Judge.Application.Submissions.Commands.TestSubmission
+@using Code_Judge.Application.Submissions.Queries
+
 @using Code_Judge.Application.TestCases.Queries.GetTestCases
 @using Code_Judge.Domain.Enums
 @using Code_Judge.WebUi.Services
 @if (Problem is not null)
 {
-    <div class="flex justify-evenly h-[calc(100vh-70px)]  w-full ">
-        <div class="prose grow  min-w-[46vw] h-[calc(100vh-70px)] py-6 overflow-y-scroll px-2">
-            <h2>@($"{Problem.Id} - {Problem.Name}")</h2>
-            @((MarkupString)Markdig.Markdown.ToHtml(Problem.Description))
-        </div>
-        <div class="w-1/2">
+    <div class="flex justify-evenly h-[calc(100vh-70px)] bg-base-200 gap-x-1 w-full ">
+        <ProblemDescription Problem="Problem">
+            
+        </ProblemDescription>
+        <div class="w-1/2 px-1 bg-base-100">
 
             <div class="h-[calc(100vh-70px)] py-2 flex gap-y-2 flex-col">
                 <div class="m-1 gap-x-5 flex">
@@ -86,13 +87,20 @@
         </h3>
         @if (ResultsStream is not null)
         {
-             foreach (var result in ResultsStream)
+            foreach (var result in ResultsStream)
             {
                 <TestCaseResultShow Result="result"/>
             }
         }
         <div class="modal-action">
+
             <button class="btn">Close</button>
+            @if (!IsSubmitting)
+            {
+                <a class="btn btn-primary" href="/Problems/@(Problem.Id)/MySubmissions">
+                    View Submission
+                </a>
+            }
         </div>
     </Modal>
 }
@@ -189,7 +197,7 @@
     {
         if (!await Validate()) return;
         IsRunningTest = true;
-        Results = TestCases.Where(t=>!t.IsHidden).Select(t => new ExecuteCodeResult() { Status = SubmissionStatus.Running, TestCase = t }).ToList();
+        Results = TestCases.Where(t => !t.IsHidden).Select(t => new ExecuteCodeResult() { Status = SubmissionStatus.Running, TestCase = t }).ToList();
         var testSubmission = new TestSubmissionCommand()
         {
             Language = Language,
@@ -215,7 +223,7 @@
     {
         if (!await Validate()) return;
         IsSubmitting = true;
-        
+
         ResultsStream = TestCases.Select(t => new ExecuteCodeResult() { Status = SubmissionStatus.Running, TestCase = t }).ToList();
         StateHasChanged();
         SubmitModalRef.Show();
@@ -240,8 +248,8 @@
             exist.Error = result.Error;
             StateHasChanged();
         }
+        var getLatestSubmission = new GetUserLatestSubmissionQuery();
         IsSubmitting = false;
-       
     }
 
 

@@ -1,11 +1,11 @@
 ﻿using Code_Judge.Domain.Enums;
 using FluentValidation;
 
-namespace Code_Judge.Application.Submissions.TestSubmission;
+namespace Code_Judge.Application.Submissions.Commands.CreateSubmission;
 
-public class TestSubmissionCommandValidator: AbstractValidator<TestSubmissionCommand>
+public class CreateSubmissionCommandValidator: AbstractValidator<CreateSubmissionCommand>
 {
-    public TestSubmissionCommandValidator()
+    public CreateSubmissionCommandValidator()
     {
         RuleFor(v => v.Code)
             .NotEmpty().WithMessage("Code is required.");

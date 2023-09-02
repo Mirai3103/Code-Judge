@@ -1,22 +1,39 @@
-﻿@page "/Admin/Problems/{id:int}/TestCases"
+﻿@page "/Admin/Problems/Edit/{id:int}/TestCases"
 @using Code_Judge.Domain.Entities
 @using Code_Judge.WebUi.Services
 @using MediatR
 @using Code_Judge.Application.Problems.Queries.GetProblemById
 @using Code_Judge.Application.TestCases.Commands.DeleteTestCase
 @using Code_Judge.Application.TestCases.Queries.GetTestCases
-@layout AdminLayout
 @if (_problem is not null)
 {
-    <div class="flex gap-y-5 flex-col  w-full ">
-        <div class="prose grow    py-6  px-2">
-            <h2>@($"{_problem.Id} - {_problem.Name}")</h2>
-            @((MarkupString)Markdig.Markdown.ToHtml(_problem.Description))
-        </div>
-        <div class="py-6 flex justify-between items-center">
-            <h2 class="text-2xl font-bold">
-                Test Cases Management
+    <div class="max-w-[1080px] mx-auto mt-4">
+
+        <div class=" flex justify-between items-center">
+            <h2 class="text-2xl font-semibold">
+                @_problem.Name
             </h2>
+            <a href="/Admin/Problems" class="btn btn-secondary">
+                Back
+            </a>
+
+        </div>
+        <div class="tabs ">
+            <a class="tab tab-lg tab-lifted " href="/Admin/Problems/Edit/@_problem?.Id">
+                Details
+            </a>
+            <a class="tab tab-lg tab-lifted tab-active">
+                Test Cases
+            </a>
+            <a class="grow tab-lg tab tab-lifted cursor-default">
+
+            </a>
+            @* <a class="tab tab-lifted">Tab 3</a> *@
+        </div>
+        <div class="flex justify-between items-center mb-2">
+            <h3 class="textarea-lg font-semibold">
+                Testcases management
+            </h3>
             <button class="btn btn-primary" @onclick="CreateTestCaseClicked">
                 Create New Test Case
             </button>
@@ -76,16 +93,16 @@
             </div>
         </div>
     </div>
-    <YesNoDialog   @ref="YesNoDialogRef" Title="@_deleteText" Message="Are you sure you want to delete this test case?" />
+    <YesNoDialog @ref="YesNoDialogRef" Title="@_deleteText" Message="Are you sure you want to delete this test case?"/>
     <CreateTestCaseModal ProblemId="@_problem.Id" Id="@_createModalId" @ref="CreateTestCaseModalRef" OnTestCaseCreated="@OnTestCaseCreated"/>
 }
 
-    @code {
+@code {
     private YesNoDialog YesNoDialogRef { get; set; } = null!;
-    private Problem? _problem ;
+    private Problem? _problem;
     private ICollection<TestCase> _testCases = null!;
     private readonly Guid _createModalId = Guid.NewGuid();
-    
+
     [Inject]
     public IMediator Mediator { get; set; } = null!;
 
@@ -100,6 +117,7 @@
 
     [Inject]
     private IJSRuntime JsRuntime { get; set; } = null!;
+
     private string _deleteText = string.Empty;
 
     protected override async Task OnInitializedAsync()
@@ -126,20 +144,23 @@
     {
         await JsRuntime.InvokeVoidAsync("showModal", _createModalId.ToString());
     }
-   private  void OnTestCaseCreated(TestCase testCase)
-   {
-       _testCases = _testCases.Prepend(testCase).ToList();
+
+    private void OnTestCaseCreated(TestCase testCase)
+    {
+        _testCases = _testCases.Prepend(testCase).ToList();
         StateHasChanged();
     }
+
     private CreateTestCaseModal CreateTestCaseModalRef { get; set; } = null!;
+
     private Action CreateConfirmDeleteTestCaseClicked(TestCase testCase)
     {
         return () =>
         {
             YesNoDialogRef?.Show();
-            _deleteText=$"Delete Test Case #{testCase.Id}"; 
+            _deleteText = $"Delete Test Case #{testCase.Id}";
 
-            YesNoDialogRef!.OnYes =  () =>
+            YesNoDialogRef!.OnYes = () =>
             {
                 var deleteTestCaseCommand = new DeleteTestCaseCommand(testCase.Id);
                 Mediator.Send(deleteTestCaseCommand);
@@ -147,12 +168,9 @@
                 _testCases = _testCases.Where(x => x.Id != testCase.Id).ToList();
                 StateHasChanged();
             };
-            YesNoDialogRef.OnNo = () =>
-            {
-                ToastService.Info("Canceled");
-            };
+            YesNoDialogRef.OnNo = () => { ToastService.Info("Canceled"); };
         };
     }
-        
+
 
 }

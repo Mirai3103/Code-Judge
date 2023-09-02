@@ -1,0 +1,94 @@
+﻿@page "/Problems/{Slug}/MySubmissions"
+@using MediatR
+@using Code_Judge.Domain.Entities
+@using Code_Judge.Application.Problems.Queries.GetProblemBySlug
+@using Code_Judge.Application.Submissions.Queries
+@using Code_Judge.Domain.Enums
+@using Code_Judge.WebUi.Services
+@if (Problem is not null)
+{
+    <div class="flex justify-evenly h-[calc(100vh-70px)] bg-base-200 gap-x-1 w-full ">
+        <ProblemDescription Problem="Problem"></ProblemDescription>
+        <div class="w-1/2 p-4 bg-base-100">
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-bold">
+                    My Submissions
+                </h2>
+                <a href="/Problems/@Slug" class="btn btn-primary">
+                    New Submission
+                </a>
+            </div>
+            <div class="overflow-x-auto max-h-full overflow-y-auto">
+                <table class="table table-zebra">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Status</th>
+                        <th>Languages</th>
+                        <th>Runtime</th>
+                        <th>Memory</th>
+                        <th>
+                            Submitted At
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var submission in Submissions!)
+                    {
+                        <tr>
+                            <td>@submission.Id</td>
+                            <td>
+                                <span class="badge p-3 @(submission.Status == Code_Judge.Domain.Enums.SubmissionStatus.Accepted ? "badge-success" : "badge-error")">
+                                    @submission.Status.ToFriendlyString()
+
+                                </span>
+                            </td>
+                            <td>@submission.Language</td>
+                            <td>@submission.RunTime</td>
+                            <td>@submission.Memory</td>
+                            <td>@submission.Created</td>
+                        </tr>
+                    }
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+
+    [Parameter]
+    public string Slug { get; set; } = "";
+
+    [Inject]
+    private IMediator Mediator { get; set; } = null!;
+
+    private Problem? Problem { get; set; }
+    private IEnumerable<Submission>? Submissions { get; set; }
+
+    [Inject]
+    private IToastService ToastService { get; set; } = null!;
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = null!;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (string.IsNullOrEmpty(Slug))
+        {
+            ToastService.Error("Problem not found");
+            NavigationManager.NavigateTo("/");
+        }
+        Problem = await Mediator.Send(new GetProblemBySlugQuery(Slug));
+        if (Problem == null)
+        {
+            ToastService.Error("Problem not found");
+            NavigationManager.NavigateTo("/");
+        }
+        Submissions = await Mediator.Send(new GetUserSubmissionsByProblemIdQuery(Problem!.Id));
+        await base.OnParametersSetAsync();
+    }
+
+}

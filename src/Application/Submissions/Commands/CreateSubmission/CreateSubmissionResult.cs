@@ -1,7 +1,7 @@
 ﻿using Code_Judge.Application.Common.Models;
 using Code_Judge.Domain.Entities;
 
-namespace Code_Judge.Application.Submissions.CreateSubmission;
+namespace Code_Judge.Application.Submissions.Commands.CreateSubmission;
 
 public class CreateSubmissionResult
 {

@@ -31,7 +31,7 @@ using Code_Judge.Infrastructure.Persistence;
         app.UseHttpsRedirection();
 
         app.UseStaticFiles();
-
+         
         app.UseRouting();
         app.UseAuthentication();//fsdsad
 // app.UseIdentityServer();//fsdsad

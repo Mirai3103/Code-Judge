@@ -1,0 +1,23 @@
+﻿using FluentValidation;
+
+namespace Code_Judge.Application.Problems.Commands.EditProblem;
+
+public class EditProblemCommandValidator : AbstractValidator<EditProblemCommand>
+{
+    public EditProblemCommandValidator()
+    {
+        RuleFor(v => v.Description)
+            .MinimumLength(50)
+            .NotEmpty();
+        RuleFor(v => v.Name)
+            .MinimumLength(10)
+            .MaximumLength(200)
+            .NotEmpty();
+        RuleFor(v => v.MemoryLimit).GreaterThan(0)
+            .NotNull();
+        RuleFor(v => v.TimeLimit).GreaterThan(0).NotNull();
+        RuleFor(v => v.Points).GreaterThan(0).NotNull();
+        RuleFor(v => v.Hint).MaximumLength(200);
+        RuleFor(v => v.DifficultyLevel).NotNull();
+    }
+}

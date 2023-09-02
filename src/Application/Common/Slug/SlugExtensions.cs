@@ -10,7 +10,7 @@ public static partial class SlugExtensions
         var regex = MyRegex();
         string temp =text.Normalize(NormalizationForm.FormD);
         return regex.Replace(temp, string.Empty).Replace('\u0111', 'd').Replace('\u0110', 'D')
-            .Replace(' ', '-');
+            .Replace(' ', '-').ToLower();
     }
 
     [GeneratedRegex("\\p{IsCombiningDiacriticalMarks}+")]

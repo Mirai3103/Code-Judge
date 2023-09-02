@@ -8,7 +8,7 @@ using Code_Judge.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace Code_Judge.Application.Submissions.TestSubmission;
+namespace Code_Judge.Application.Submissions.Commands.TestSubmission;
 
 public record TestSubmissionCommand:IRequest<ICollection<ExecuteCodeResult>>
 {

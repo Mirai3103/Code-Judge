@@ -9,5 +9,5 @@ public abstract class BaseAuditableEntity : BaseEntity
     public DateTime? LastModified { get; set; }
 
     public string? LastModifiedBy { get; set; }
-    public DateTime Deleted { get; set; }
+    public DateTime? Deleted { get; set; } = null;
 }

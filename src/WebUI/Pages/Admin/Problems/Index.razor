@@ -5,7 +5,7 @@
 @using Code_Judge.Domain.Enums
 @layout AdminLayout
 <div class="flex justify-between my-4">
-     <h1 class="text-2xl font-bold">
+    <h1 class="text-2xl font-bold">
         Problems Management
     </h1>
     <a class="btn btn-primary"href="/Admin/Problems/Create">
@@ -13,73 +13,92 @@
     </a>
 </div>
 <div class="overflow-x-auto">
-  <table class="table ">
-    <!-- head -->
-    <thead>
-      <tr>
-          <th>
-              Id
-          </th>
-          <th>
-              Title
-          </th>
-          <th>
-              Difficulty
-          </th>
-          <th>
-              Points
-          </th>
-          <th>
-              Created On
-          </th>
-          <th>
-              <i class="fa-solid fa-ellipsis"></i>
-          </th>
-      </tr>
-    </thead>
-    <tbody>
-     @if(Problems != null)
-     {
-         @foreach(var problem in Problems.Items)
-         {
-             <tr class="cursor-pointer hover:bg-base-200">
-                 <td>
-                     @problem.Id
-                 </td>
-                 <td>
-                     @problem.Name
-                 </td>
-                 <td>
-                     @problem.DifficultyLevel.ToFriendlyString()
-                 </td>
-                 <td>
-                     @problem.Points
-                 </td>
-                 <td>
-                     @problem.Created
-                 </td>
-                 <td>
-                     <div class="btn-group">
-                         <button class="btn btn-warning" @onclick="CreateEditClickHandler(problem.Id)">
-                             Edit
-                         </button>
-                         <button class="btn btn-error">
-                             Delete
-                         </button>
-                     </div>
-                 </td>
-             </tr>
-         }
-     }
-    </tbody>
-  </table>
+    <table class="table ">
+        <!-- head -->
+        <thead>
+        <tr>
+            <th>
+                Id
+            </th>
+            <th>
+                Title
+            </th>
+            <th>
+                Difficulty
+            </th>
+            <th>
+                Points
+            </th>
+            <th>
+                Created On
+            </th>
+            <th>
+                <i class="fa-solid fa-ellipsis"></i>
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        @if (Problems != null)
+        {
+            @foreach (var problem in Problems.Items)
+            {
+                <tr class="cursor-pointer hover:bg-base-200">
+                    <td>
+                        @problem.Id
+                    </td>
+                    <td>
+                        @problem.Name
+                    </td>
+                    <td>
+                        @problem.DifficultyLevel.ToFriendlyString()
+                    </td>
+                    <td>
+                        @problem.Points
+                    </td>
+                    <td>
+                        @problem.Created
+                    </td>
+                    <td>
+                        <div class="btn-group">
+                            <button class="btn btn-warning" @onclick="CreateEditClickHandler(problem.Id)">
+                                Edit
+                            </button>
+                            <button class="btn btn-error">
+                                Delete
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        }
+        </tbody>
+    </table>
+    <div class="w-full flex justify-center">
+        <div class="join">
+            <button class="join-item btn" disabled="@(Problems?.HasPreviousPage == false)" onclick="@PreviousPage">
+                «
+            </button>
+            <button class="join-item btn">Page  @CurrentPage
+             
+                </button>
+            <button class="join-item btn" disabled="@(Problems?.HasNextPage == false)" onclick="@NextPage">
+                »
+            </button>
+        </div>
+    </div>
 </div>
 
 @code {
-    [Inject] IMediator Mediator { get; set; } = null!;
-    [Inject] NavigationManager NavigationManager { get; set; } = null!;
+
+    [Inject]
+    IMediator Mediator { get; set; } = null!;
+
+    [Inject]
+    NavigationManager NavigationManager { get; set; } = null!;
+
     private int CurrentPage { get; set; } = 1;
     private PaginatedList<ProblemBriefDto>? Problems { get; set; } = null;
+    
     protected override async Task OnInitializedAsync()
     {
         var command = new GetProblemsWithPaginationQuery()
@@ -90,12 +109,33 @@
         var result = await Mediator.Send(command);
         Problems = result;
     }
+
     private Action CreateEditClickHandler(int id)
     {
-        return () =>
-        {
-            NavigationManager.NavigateTo($"/Admin/Problems/{id}");
-        };
+        return () => { NavigationManager.NavigateTo($"/Admin/Problems/Edit/{id}"); };
     }
-    
+    private async Task SetPage(int page)
+    {
+        CurrentPage = page;
+        var command = new GetProblemsWithPaginationQuery()
+        {
+            PageNumber = CurrentPage,
+            PageSize = 24
+        };
+        Problems = await Mediator.Send(command);
+    }
+    private async Task NextPage()
+    {
+        if (Problems?.HasNextPage == true)
+        {
+           await SetPage(CurrentPage + 1);
+        }
+    }
+    private async Task PreviousPage()
+    {
+        if (Problems?.HasPreviousPage == true)
+        {
+         await   SetPage(CurrentPage - 1);
+        }
+    }
 }
